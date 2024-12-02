@@ -8,6 +8,54 @@ def main():
     file (e.g. _generated.py) and then run.
     """
 
+    n = 1
+    filepath = f'./q{n}.txt'
+    ere = []
+    with open(filepath, "r") as f:
+        ere = f.read().splitlines()
+
+    mf_struct = {}
+    print(ere)
+    for i, l in enumerate(ere):
+        if l == "SELECT ATTRIBUTE(S):":
+            select_attr = ere[i+1].split(",")
+            print(f"S: {select_attr}")
+        if l == "NUMBER OF GROUPING VARIABLES(n):":
+            n = int(ere[i+1])
+            print(f"n: {n}")
+        if l == "GROUPING ATTRIBUTES(V):":
+            group_attr = ere[i+1].split(",")
+            print(f"V: {group_attr}")
+        if l == "F-VECT([F]):":
+            aggregates = ere[i+1].split(",")
+            print(f"F: {aggregates}")
+        if l == "SELECT CONDITION-VECT([C]):":
+            select_conds = []
+            curr_line = l
+            while curr_line != "HAVING CLAUSE (G):":
+                i += 1
+                curr_line = ere[i+1]
+                select_conds.append(curr_line)
+            print(f"C: {select_conds}")
+        # if l == "HAVING CLAUSE (G):":
+        #     having_conds = []
+        #     curr_line = l
+        #     while curr_line != "":
+
+
+    '''
+    While(1) {
+        Read(row)
+        If (row.cust in mf_struct) {
+            Update aggregates in mf_struct
+        } else {
+            Add row.cust to mf_struct
+            Initialize the aggregate
+        }
+    }
+    Output mf_struct
+    '''
+
     body = """
     for row in cur:
         if row['quant'] > 10:
