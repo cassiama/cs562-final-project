@@ -21,9 +21,7 @@ def query():
     
     _global = []
     
-    for row in cur:
-        if row['quant'] > 10:
-            _global.append(row)
+
     
     
     return tabulate.tabulate(_global,
