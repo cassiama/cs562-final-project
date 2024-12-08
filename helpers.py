@@ -55,7 +55,7 @@ def mf_struct_from_input_file(input_file_no):
 
 def main_algoritm(input_file_no):
     mf_struct = mf_struct_from_input_file(input_file_no)
-    print(mf_struct)
+    # print(mf_struct)
     # go through each such that clause
     for i in mf_struct['C']:
         print(i)
