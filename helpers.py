@@ -53,10 +53,14 @@ def mf_struct_from_input_file(input_file_no):
     return mf_struct
 
 
-def main_algoritm(input_file_no):
-    mf_struct = mf_struct_from_input_file(input_file_no)
-    # print(mf_struct)
-    # go through each such that clause
-    for i in mf_struct['C']:
-        print(i)
-     
+def main_algoritm(mf_struct):
+    generated_code = []
+
+    for condition in mf_struct['C']:
+       
+        generated_code.append(f"if {condition}:")
+        generated_code.append("    # Process the row according to the condition")
+
+    # Generate the final algorithm block
+    algoritm = "\n".join(generated_code)
+    return algoritm
