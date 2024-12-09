@@ -1,3 +1,6 @@
+import tabulate
+from collections import defaultdict
+
 def mf_struct_from_input_file(input_file_no):
 
     filepath = f'./q{input_file_no}.txt'
@@ -52,15 +55,67 @@ def mf_struct_from_input_file(input_file_no):
     # print(f"Columns of mf_struct: {list(mf_struct.keys())}")
     return mf_struct
 
+def create_bitmaps(full_table, grouping_attributes):
+ 
+    # Create a set to find unique values of Grouping attributes
+    if len(grouping_attributes) == 1:
+        unique_groups = set(row[grouping_attributes[0]] for row in full_table)
+    else:
+        unique_groups = set(
+            tuple(row[attr] for attr in grouping_attributes) for row in full_table
+        )
+
+    # Create a bitmap for each unique value or combination of values
+    bitmaps = {}
+
+    for group_key in unique_groups:
+        bitmap = []
+        for row in full_table:
+            if len(grouping_attributes) == 1:
+                if row[grouping_attributes[0]] == group_key:
+                    bitmap.append(1)
+                else:
+                    bitmap.append(0)
+            else:
+                if tuple(row[attr] for attr in grouping_attributes) == group_key:
+                    bitmap.append(1)
+                else:
+                    bitmap.append(0)
+            bitmaps[group_key] = bitmap
+        else:
+            bitmaps[group_key] = bitmap
+
+    return bitmaps
+
+
+def parse_gv_predicates(gv_predicates):
+   
+   conditions = []
+   # still need to implement later
+   
+   return conditions
+
+def extract_rows_bitmap(bitmap, full_table):
+    rows = []
+
+    for index, bit in enumerate(bitmap):
+        if bit == 1:
+            rows.append(full_table[index])  # Add the row if the bitmap value is 1
+
+    return rows
 
 def main_algoritm(mf_struct):
+    
     generated_code = []
 
-    for condition in mf_struct['C']:
-       
-        generated_code.append(f"if {condition}:")
-        generated_code.append("    # Process the row according to the condition")
+    for gv_predicates in mf_struct['C']:
+        conditions = parse_gv_predicates(gv_predicates)
+        generated_code.append(f"if {conditions}:")
+        generated_code.append("    _buckets.append(row)")
 
     # Generate the final algorithm block
     algoritm = "\n".join(generated_code)
     return algoritm
+
+def print_dict_as_table(array):
+    print(tabulate.tabulate(array,headers="keys", tablefmt="psql"))  
