@@ -21,7 +21,7 @@ def query():
     cur.execute("SELECT * FROM sales")
     _global = []
     
-    input_file_no = 2
+    input_file_no = 1
     mf_struct = mf_struct_from_input_file(input_file_no)
    
     algoritm = main_algoritm(mf_struct)

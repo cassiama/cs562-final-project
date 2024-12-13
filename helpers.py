@@ -125,20 +125,22 @@ def parse_condition(condition, group_key, grouping_attributes):
     def replace_group_key(match):
         prefix, attr = match.groups()
 
-        # If the prefix (e.g., 'cust' or 'state') is in the grouping attributes
+        # If the attribute is in the grouping attributes
         if attr in grouping_attributes:
             index = grouping_attributes.index(attr)
-            return f"row.{attr} == {repr(group_key[index])}"  # Replace with corresponding group_key value
-        
-        # If the prefix is not found in the grouping attributes, return the match unchanged
+            # Replace with corresponding value from group_key
+            return f"row.{attr} == {repr(group_key[index])}"
+
+        # Return the match unchanged if it's not in the grouping attributes
         return match.group(0)
     
     # Step 3: Replace occurrences of '{prefix}.{attr}' with dynamic group_key values
     condition = re.sub(r'(\w+)\.(\w+)', replace_group_key, condition)
     
-    # Step 4: Remove unnecessary equality signs (=) between attributes and values
-    condition = re.sub(r"= (\w+)", "", condition)
+    # Step 4: Ensure proper comparison operators (==) and clean up
+    condition = re.sub(r"\s*=\s*", " == ", condition)  # Ensure proper equality operator
 
     return condition
+    
 def print_dict_as_table(array):
     print(tabulate.tabulate(array,headers="keys", tablefmt="psql"))  
