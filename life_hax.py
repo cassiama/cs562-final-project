@@ -65,7 +65,7 @@ def query():
     aggregates = {agg: [] for agg in mf_struct['F']}
     avg_quant_rows = [[], [], []] 
 
-    for group_key, bitmap in bitmaps.items():
+    for index,(group_key, bitmap) in enumerate(bitmaps.items()):
         local_quant_rows = [[], [], []] 
         relevant_rows = extract_rows_bitmap(bitmap, _all_sales)
         for aggregate in mf_struct['F']:
@@ -75,7 +75,10 @@ def query():
                     parsed_condition = parse_condition(condition, group_key, mf_struct['V'])
                     if eval(parsed_condition):
                         local_quant_rows[index].append(row)
+          
+                     
         print(group_key, 'done')
+        print(_global[0]['cust'].append(group_key))    
 
         for i, avg_rows in enumerate(local_quant_rows):
             if avg_rows:
@@ -83,11 +86,21 @@ def query():
                 total_quant = sum(row['quant'] for row in avg_rows if 'quant' in row)
                 average_quant = total_quant / len(avg_rows) if avg_rows else 0
                 print(f"Average of quant for avg_{i+1}_quant: {average_quant:.2f}")
+                avg_quant_rows[i].append(average_quant)
+                
             else:
                 print(f"No data available for avg_{i+1}_quant.")
+    # STEPS TO DO
+    # make local_quant_rows & avg_quant_rows general made off n?
+    # make a function to extract aggregates input (mf_struct['F'], local_quant_rows) Output: calculates and appends aggregate to avg_quant_rows , switch case?
+    # make sure parse_condition is general
+    # mapping distict customers and the avg_quant_rows to the _global column
 
+    # LATER TO DO
+    # TESTING try with having, where, other grouping arributes, no such that
+    # migrate all this to generator
 
-   
+    print(avg_quant_rows)
     # STEP 3
     '''
     Because of the form of G, each G_j can be checked either (a) on the aggregate tables alone, or (b) on a single R_i relation together with the aggregate tables. For a group, there is a single tuple in each aggregate table. Hence selection conditions on the aggregate tables either include or exclude the group as a whole; if such a condition is violated, we simply move to the next group.
