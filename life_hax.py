@@ -62,30 +62,29 @@ def query():
     '''
     Make arrays for each grouping variable and calculate the aggregates 
     '''
+    aggregates = {agg: [] for agg in mf_struct['F']}
+
     for group_key, bitmap in bitmaps.items():
         for aggregate in mf_struct['F']:
-            agg = []  # Initialize the aggregation list for the current aggregate
             for row in _all_sales:
-                print()
-                for condition in mf_struct['C']:
+                for index, condition in enumerate(mf_struct['C']):
                 # Parse the condition dynamically
                     print(group_key)
                     parsed_condition = parse_condition(condition, group_key, mf_struct['V'])
-                    print(f"Parsed Condition: {parsed_condition}")
-
                     try:
                     # Ensure eval is evaluating the parsed condition correctly
                         if eval(parsed_condition):
                         # If the condition is met, process the row for aggregation
-                            agg.append(row)  
+                            aggregates[index].append(row)  
                     except Exception as e:
                     # Handle errors gracefully for debugging
                         print(f"Error evaluating condition: {parsed_condition}")
                         print(f"Exception: {e}")
                     continue
-                print('agg =', print_dict_as_table(agg))
 
-                
+    for aggregate, rows in aggregates.items():
+        print(f"Aggregation for {aggregate}:")
+        print(print_dict_as_table(rows))          
 
 
    
