@@ -56,37 +56,40 @@ def mf_struct_from_input_file(input_file_no):
     return mf_struct
 
 def create_bitmaps(full_table, grouping_attributes):
- 
     # Create a set to find unique values of Grouping attributes
     if len(grouping_attributes) == 1:
-        unique_groups = set(row[grouping_attributes[0]] for row in full_table)
+        # Single attribute case: wrap the single attribute value in a tuple
+        unique_groups = set((row[grouping_attributes[0]],) for row in full_table)
     else:
+        # Multiple attribute case: create keys as tuples of attribute values
         unique_groups = set(
             tuple(row[attr] for attr in grouping_attributes) for row in full_table
         )
 
-    # Create a bitmap for each unique value or combination of values
+    # Create a bitmap for each unique combination of values
     bitmaps = {}
 
     for group_key in unique_groups:
         bitmap = []
         for row in full_table:
             if len(grouping_attributes) == 1:
-                if row[grouping_attributes[0]] == group_key:
+                # Single attribute case: compare with tuple key
+                if (row[grouping_attributes[0]],) == group_key:
                     bitmap.append(1)
                 else:
                     bitmap.append(0)
             else:
-                if tuple(row[attr] for attr in grouping_attributes) == group_key:
+                # Multiple attributes case
+                row_key = tuple(row[attr] for attr in grouping_attributes)
+                if row_key == group_key:
                     bitmap.append(1)
                 else:
                     bitmap.append(0)
-            bitmaps[group_key] = bitmap
-        else:
-            bitmaps[group_key] = bitmap
+        
+        # Assign the bitmap to the corresponding group_key
+        bitmaps[group_key] = bitmap
 
     return bitmaps
-
 
 def parse_gv_predicates(gv_predicates):
    

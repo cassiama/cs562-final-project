@@ -71,14 +71,15 @@ def query():
             for row in relevant_rows:
                 for index, condition in enumerate(mf_struct['C']):
                 # Parse the condition dynamically
-                    print(group_key)
                     parsed_condition = parse_condition(condition, group_key, mf_struct['V'])
-                    # Ensure eval is evaluating the parsed condition correctly
                     if eval(parsed_condition):
+                        print(parsed_condition, 'added to',aggregate)
                         # If the condition is met, process the row for aggregation
                         aggregates[aggregate].append(row)  
 
-    print(aggregates)                     
+    print(print_dict_as_table(aggregates['avg_1_quant'])) 
+    print(print_dict_as_table(aggregates['avg_2_quant']))  
+    print(print_dict_as_table(aggregates['avg_3_quant']))                    
 
 
    
