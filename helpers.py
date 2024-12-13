@@ -127,7 +127,16 @@ def parse_condition(condition, group_key, grouping_attributes):
     # Step 2: Replace any prefix before a dot (.) with 'row.'
     condition = re.sub(r'\b\w+\.', 'row.', condition)
 
-    # Step 3: find any instances of grouping
+    # Step 3: find any instances of grouping_attributes eg "if \scust\s exist take its index", then replace it with group_key[index]
+    for attr in grouping_attributes:
+        # Find the index of the attribute in grouping_attributes
+        if attr in condition:
+            attr_index = grouping_attributes.index(attr)  # Find the index of the attribute
+            value = group_key[attr_index]  # Get the corresponding value from group_key
+
+            # Replace occurrences of the attribute, ensuring it is isolated with spaces around it
+            # We also handle the case where it's at the start or end of the string.
+            condition = re.sub(rf"(?<=\s){attr}(?=\s)", f"'{value}'", condition)
     
 
     return condition
