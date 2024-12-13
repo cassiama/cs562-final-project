@@ -66,7 +66,7 @@ def query():
     avg_quant_rows = [[], [], []] 
 
     for group_key, bitmap in bitmaps.items():
-
+        local_quant_rows = [[], [], []] 
         relevant_rows = extract_rows_bitmap(bitmap, _all_sales)
         for aggregate in mf_struct['F']:
             for row in relevant_rows:
@@ -74,16 +74,17 @@ def query():
                 # Parse the condition dynamically
                     parsed_condition = parse_condition(condition, group_key, mf_struct['V'])
                     if eval(parsed_condition):
-                        avg_quant_rows[index].append(row)
+                        local_quant_rows[index].append(row)
+        print(group_key, 'done')
 
-    print("Rows for avg_1_quant:")
-    print(print_dict_as_table(avg_quant_rows[0]))
-    
-    print("Rows for avg_2_quant:")
-    print(print_dict_as_table(avg_quant_rows[1]))
-    
-    print("Rows for avg_3_quant:")
-    print(print_dict_as_table(avg_quant_rows[2]))                    
+        for i, avg_rows in enumerate(local_quant_rows):
+            if avg_rows:
+                # Calculate the average of the 'quant' field (assuming 'quant' is the column for quantity)
+                total_quant = sum(row['quant'] for row in avg_rows if 'quant' in row)
+                average_quant = total_quant / len(avg_rows) if avg_rows else 0
+                print(f"Average of quant for avg_{i+1}_quant: {average_quant:.2f}")
+            else:
+                print(f"No data available for avg_{i+1}_quant.")
 
 
    
