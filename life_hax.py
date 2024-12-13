@@ -94,11 +94,11 @@ def query():
     # make local_quant_rows & avg_quant_rows general made off n?
     # make a function to extract aggregates input (mf_struct['F'], local_quant_rows) Output: calculates and appends aggregate to avg_quant_rows , switch case?
     # make sure parse_condition is general
-    # mapping distict customers and the avg_quant_rows to the _global column
+    # mapping distict customers and the avg_quant_rows to the _global column IMP!!!!!
 
     # LATER TO DO
     # TESTING try with having, where, other grouping arributes, no such that
-    # migrate all this to generator
+    # migrate all this to generator 
 
     print(avg_quant_rows)
     # STEP 3
