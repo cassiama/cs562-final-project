@@ -4,7 +4,7 @@ import psycopg2
 import psycopg2.extras
 import tabulate
 from dotenv import load_dotenv
-from helpers import mf_struct_from_input_file,main_algoritm,print_dict_as_table,create_bitmaps,extract_rows_bitmap
+from helpers import mf_struct_from_input_file,main_algoritm,print_dict_as_table,create_bitmaps,extract_rows_bitmap,parse_condition
 
 # THIS IS A FILE FOR TESTING PURPOSES, PLEASE DELETE AT THE END OF PROJECT
 
@@ -48,7 +48,6 @@ def query():
     bitmaps = create_bitmaps(_all_sales,mf_struct['V'])
     for group_key, bitmap in bitmaps.items():
         bitmaps_rows = extract_rows_bitmap(bitmap, _all_sales)
-        print(f"Group: {group_key}")
         '''
         # this builds the 1st scan
         if only 1 group attribute
@@ -58,16 +57,40 @@ def query():
             preprocess the tuple
             map according to each column of group by attribute array
         '''
-        print_dict_as_table(bitmaps_rows)  
+        # print_dict_as_table(bitmaps_rows)  
     # STEP 2
     '''
-    Make (n + 1) passes over the group. On the first pass (i = 0), the aggregates F_o of the full group are computed. On subsequent passes 1 <= i <= n, the selections σ_i on r_i and the aggregates F_i of r_i are simultaneously computed. The selection result is stored in b_i, with a bit set if the corresponding tuple (together with previously computed aggregate values) satisfies σ_i. If any selection result is empty, we can immediately move to the next group.
+    Make arrays for each grouping variable and calculate the aggregates 
     '''
-    # for _ in range(1, len(mf_struct['n'])):
-    #     print("Calculating the 1st aggregate on the group")
-    #     for i in range(len(bitmaps)):
-    #         pass
-    
+   for group_key, bitmap in bitmaps.items():
+    for aggregate in mf_struct['F']:
+        agg = []  # Initialize the aggregation list for the current aggregate
+        for row in _all_sales:
+            for condition in mf_struct['C']:
+                # Parse the condition dynamically
+                parsed_condition = parse_condition(condition, group_key, mf_struct['V'])
+
+                # Debug: Print the parsed condition
+                print(f"Parsed Condition: {parsed_condition}")
+
+                try:
+                    # Ensure eval is evaluating the parsed condition correctly
+                    if eval(parsed_condition):
+                        # If the condition is met, process the row for aggregation
+                        agg.append(row[aggregate])  # Assuming aggregate column exists in row
+                except Exception as e:
+                    # Handle errors gracefully for debugging
+                    print(f"Error evaluating condition: {parsed_condition}")
+                    print(f"Exception: {e}")
+                    continue
+
+        # Process the aggregation result
+        _global.append({aggregate: sum(agg) / len(agg) if agg else 0})
+
+                
+
+
+   
     # STEP 3
     '''
     Because of the form of G, each G_j can be checked either (a) on the aggregate tables alone, or (b) on a single R_i relation together with the aggregate tables. For a group, there is a single tuple in each aggregate table. Hence selection conditions on the aggregate tables either include or exclude the group as a whole; if such a condition is violated, we simply move to the next group.

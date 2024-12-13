@@ -1,4 +1,4 @@
-import tabulate
+import tabulate, re
 from collections import defaultdict
 
 def mf_struct_from_input_file(input_file_no):
@@ -117,5 +117,28 @@ def main_algoritm(mf_struct):
     algoritm = "\n".join(generated_code)
     return algoritm
 
+def parse_condition(condition, group_key, grouping_attributes):
+    # Step 1: Replace any prefix before the dot with 'row.'
+    condition = re.sub(r'\b\w+\.', 'row.', condition)
+    
+    # Step 2: Replace group attributes (e.g., cust, state) with the corresponding value from group_key
+    def replace_group_key(match):
+        prefix, attr = match.groups()
+
+        # If the prefix (e.g., 'cust' or 'state') is in the grouping attributes
+        if attr in grouping_attributes:
+            index = grouping_attributes.index(attr)
+            return f"row.{attr} = {repr(group_key[index])}"  # Replace with corresponding group_key value
+        
+        # If the prefix is not found in the grouping attributes, return the match unchanged
+        return match.group(0)
+    
+    # Step 3: Replace occurrences of '{prefix}.{attr}' with dynamic group_key values
+    condition = re.sub(r'(\w+)\.(\w+)', replace_group_key, condition)
+    
+    # Step 4: Remove unnecessary equality signs (=) between attributes and values
+    condition = re.sub(r"= (\w+)", "", condition)
+
+    return condition
 def print_dict_as_table(array):
     print(tabulate.tabulate(array,headers="keys", tablefmt="psql"))  

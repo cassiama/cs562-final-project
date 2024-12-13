@@ -21,7 +21,7 @@ def query():
     cur.execute("SELECT * FROM sales")
     _global = []
     
-    input_file_no = 1
+    input_file_no = 2
     mf_struct = mf_struct_from_input_file(input_file_no)
    
     algoritm = main_algoritm(mf_struct)
@@ -43,10 +43,11 @@ def query():
         #  _global.append(dict(row)) 
     # STEP 1
     bitmaps = create_bitmaps(_all_sales,mf_struct['V'])
+    print(bitmaps)
     for group_key, bitmap in bitmaps.items():
         bitmaps_rows = extract_rows_bitmap(bitmap, _all_sales)
         print(f"Group: {group_key}")
-        print_dict_as_table(bitmaps_rows)   
+        # print_dict_as_table(bitmaps_rows)   
     # STEP 2
 
 
