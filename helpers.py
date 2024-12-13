@@ -138,7 +138,14 @@ def parse_condition(condition, group_key, grouping_attributes):
             # We also handle the case where it's at the start or end of the string.
             condition = re.sub(rf"(?<=\s){attr}(?=\s)", f"'{value}'", condition)
     
+    def convert_dot_notation_to_dict_key(condition):
+        condition = re.sub(r'row\.(\w+)', r'row["\1"]', condition)
+    
+        return condition
+    
 
+
+    condition = convert_dot_notation_to_dict_key(condition)
     return condition
     
     

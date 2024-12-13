@@ -66,6 +66,7 @@ def query():
         for aggregate in mf_struct['F']:
             agg = []  # Initialize the aggregation list for the current aggregate
             for row in _all_sales:
+                print()
                 for condition in mf_struct['C']:
                 # Parse the condition dynamically
                     print(group_key)
@@ -76,12 +77,13 @@ def query():
                     # Ensure eval is evaluating the parsed condition correctly
                         if eval(parsed_condition):
                         # If the condition is met, process the row for aggregation
-                            agg.append(row[aggregate])  # Assuming aggregate column exists in row
+                            agg.append(row)  
                     except Exception as e:
                     # Handle errors gracefully for debugging
                         print(f"Error evaluating condition: {parsed_condition}")
                         print(f"Exception: {e}")
                     continue
+                print('agg =', print_dict_as_table(agg))
 
                 
 
