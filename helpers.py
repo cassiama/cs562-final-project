@@ -128,7 +128,7 @@ def parse_condition(condition, group_key, grouping_attributes):
         # If the prefix (e.g., 'cust' or 'state') is in the grouping attributes
         if attr in grouping_attributes:
             index = grouping_attributes.index(attr)
-            return f"row.{attr} = {repr(group_key[index])}"  # Replace with corresponding group_key value
+            return f"row.{attr} == {repr(group_key[index])}"  # Replace with corresponding group_key value
         
         # If the prefix is not found in the grouping attributes, return the match unchanged
         return match.group(0)
