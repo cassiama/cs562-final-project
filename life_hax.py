@@ -65,26 +65,20 @@ def query():
     aggregates = {agg: [] for agg in mf_struct['F']}
 
     for group_key, bitmap in bitmaps.items():
+
+        relevant_rows = extract_rows_bitmap(bitmap, _all_sales)
         for aggregate in mf_struct['F']:
-            for row in _all_sales:
+            for row in relevant_rows:
                 for index, condition in enumerate(mf_struct['C']):
                 # Parse the condition dynamically
                     print(group_key)
                     parsed_condition = parse_condition(condition, group_key, mf_struct['V'])
-                    try:
                     # Ensure eval is evaluating the parsed condition correctly
-                        if eval(parsed_condition):
+                    if eval(parsed_condition):
                         # If the condition is met, process the row for aggregation
-                            aggregates[index].append(row)  
-                    except Exception as e:
-                    # Handle errors gracefully for debugging
-                        print(f"Error evaluating condition: {parsed_condition}")
-                        print(f"Exception: {e}")
-                    continue
+                        aggregates[aggregate].append(row)  
 
-    for aggregate, rows in aggregates.items():
-        print(f"Aggregation for {aggregate}:")
-        print(print_dict_as_table(rows))          
+    print(aggregates)                     
 
 
    
