@@ -118,29 +118,20 @@ def main_algoritm(mf_struct):
     return algoritm
 
 def parse_condition(condition, group_key, grouping_attributes):
-    # Step 1: Replace any prefix before the dot with 'row.'
+
+    # Step 1: Clean up whitespace around equality operators (optional)
+    condition = re.sub(r"\s*=\s*", " == ", condition)  # uncomment if needed
+
+    condition = condition.strip()  # Remove leading and trailing whitespace
+
+    # Step 2: Replace any prefix before a dot (.) with 'row.'
     condition = re.sub(r'\b\w+\.', 'row.', condition)
-    
-    # Step 2: Replace group attributes (e.g., cust, state) with the corresponding value from group_key
-    def replace_group_key(match):
-        prefix, attr = match.groups()
 
-        # If the attribute is in the grouping attributes
-        if attr in grouping_attributes:
-            index = grouping_attributes.index(attr)
-            # Replace with corresponding value from group_key
-            return f"row.{attr} == {repr(group_key[index])}"
-
-        # Return the match unchanged if it's not in the grouping attributes
-        return match.group(0)
+    # Step 3: find any instances of grouping
     
-    # Step 3: Replace occurrences of '{prefix}.{attr}' with dynamic group_key values
-    condition = re.sub(r'(\w+)\.(\w+)', replace_group_key, condition)
-    
-    # Step 4: Ensure proper comparison operators (==) and clean up
-    condition = re.sub(r"\s*=\s*", " == ", condition)  # Ensure proper equality operator
 
     return condition
+    
     
 def print_dict_as_table(array):
     print(tabulate.tabulate(array,headers="keys", tablefmt="psql"))  

@@ -21,7 +21,7 @@ def query():
     cur.execute("SELECT * FROM sales")
     _global = []
     
-    input_file_no = 1
+    input_file_no = 2
     mf_struct = mf_struct_from_input_file(input_file_no)
    
     algoritm = main_algoritm(mf_struct)
@@ -68,6 +68,7 @@ def query():
             for row in _all_sales:
                 for condition in mf_struct['C']:
                 # Parse the condition dynamically
+                    print(group_key)
                     parsed_condition = parse_condition(condition, group_key, mf_struct['V'])
                     print(f"Parsed Condition: {parsed_condition}")
 
