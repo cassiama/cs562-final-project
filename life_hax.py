@@ -21,7 +21,7 @@ def query():
     cur.execute("SELECT * FROM sales")
     _global = []
     
-    input_file_no = 2
+    input_file_no = 1
     mf_struct = mf_struct_from_input_file(input_file_no)
    
     algoritm = main_algoritm(mf_struct)
@@ -63,6 +63,7 @@ def query():
     Make arrays for each grouping variable and calculate the aggregates 
     '''
     aggregates = {agg: [] for agg in mf_struct['F']}
+    avg_quant_rows = [[], [], []] 
 
     for group_key, bitmap in bitmaps.items():
 
@@ -73,13 +74,16 @@ def query():
                 # Parse the condition dynamically
                     parsed_condition = parse_condition(condition, group_key, mf_struct['V'])
                     if eval(parsed_condition):
-                        print(parsed_condition, 'added to',aggregate)
-                        # If the condition is met, process the row for aggregation
-                        aggregates[aggregate].append(row)  
+                        avg_quant_rows[index].append(row)
 
-    print(print_dict_as_table(aggregates['avg_1_quant'])) 
-    print(print_dict_as_table(aggregates['avg_2_quant']))  
-    print(print_dict_as_table(aggregates['avg_3_quant']))                    
+    print("Rows for avg_1_quant:")
+    print(print_dict_as_table(avg_quant_rows[0]))
+    
+    print("Rows for avg_2_quant:")
+    print(print_dict_as_table(avg_quant_rows[1]))
+    
+    print("Rows for avg_3_quant:")
+    print(print_dict_as_table(avg_quant_rows[2]))                    
 
 
    
