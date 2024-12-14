@@ -11,8 +11,9 @@ def mf_struct_from_input_file(input_file_no):
     mf_struct = {}
     # print(ere)
     n_gv = 0
-    select_attr = group_attr = aggregates = select_conds = having_conds = []
-
+    select_attr = group_attr = aggregates = select_conds = having_conds = where_clause =  []
+    
+   
     # get the select attributes
     select_attr = ere[ere.index("SELECT ATTRIBUTE(S):") + 1].split(", ")
     # print(f"S: {select_attr}")
@@ -32,6 +33,13 @@ def mf_struct_from_input_file(input_file_no):
     # print(f"V: {group_attr}")
     mf_struct['V'] = group_attr
     # uncomment line above if we decide to handle mf_struct differently
+
+    # get the where clause
+    if "WHERE CLAUSE(W):" in ere:
+        where_clause = ere[ere.index("WHERE CLAUSE(W):") + 1]
+        mf_struct['W'] = where_clause if where_clause else '-'
+    else:
+        mf_struct['W'] = '-'
 
     # get the aggregates vector
     aggregates = ere[ere.index("F-VECT([F]):") + 1].split(', ')
@@ -151,6 +159,21 @@ def parse_condition(condition, group_key, grouping_attributes):
     condition = convert_dot_notation_to_dict_key(condition)
     return condition
     
+def parse_where_condition(condition):
+    # Step 1: Clean up whitespace around equality operators
+    condition = re.sub(r"\s*=\s*", " == ", condition)
+    condition = condition.strip()  # Remove leading and trailing whitespace
+    sales_columns = ['cust', 'prod', 'day', 'month', 'year', 'state', 'quant', 'date']
+
+    # Step 2: Prefix column names in sales_columns with 'row.' if they exist in the string
+    for col in sales_columns:
+        # Use regex to ensure matching isolated column names
+        condition = re.sub(rf"\b{col}\b", f"row.{col}", condition)
+
+    # Step 4: Convert dot notation (e.g., row.col) to dictionary key notation (row["col"])
+    condition = re.sub(r"row\.(\w+)", r'row["\1"]', condition)
+
+    return condition    
     
 def print_dict_as_table(array):
     print(tabulate.tabulate(array,headers="keys", tablefmt="psql"))  
