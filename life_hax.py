@@ -26,11 +26,6 @@ def query():
    
     algoritm = main_algoritm(mf_struct)
     print(mf_struct)
-
-    # Initialize _global with empty arrays for each column name in 'S'
-    _global = [{key: [] for key in mf_struct['V'] + mf_struct['F']}]
-    print(_global)
-  
     
     # get all the rows from table
     rows = cur.fetchall()
@@ -63,53 +58,13 @@ def query():
     Make arrays for each grouping variable and calculate the aggregates 
     '''
 
-
-    def calculate_and_append_aggregates(local_aggregate_rows, global_aggregates):
-      split_values = [item.split('_') for item in aggregates]
-
-      for item in split_values:
-            agg, gv, col = item  # Destructure the list into variables
-            print(f"agg: {agg}, gv: {gv}, col: {col}")
-            
-            for i, row in enumerate(local_aggregate_rows):
-                if row:
-                    if agg == 'sum':
-                        # Sum of 'col' values
-                        total_value = sum(r[col] for r in row if col in r)
-                        print(f"Sum of {col} for {agg}_{gv}_{col}: {total_value}")
-                        global_aggregates[int(gv)].append(total_value)
-
-                    elif agg == 'avg':
-                        # Average of 'col' values
-                        total_value = sum(r[col] for r in row if col in r)
-                        average_value = total_value / len(row) if row else 0
-                        print(f"Average of {col} for {agg}_{gv}_{col}: {average_value:.2f}")
-                        global_aggregates[int(gv) -1].append(average_value)
-
-                    elif agg == 'min':
-                        # Minimum of 'col' values
-                        min_value = min(r[col] for r in row if col in r)
-                        print(f"Min of {col} for {agg}_{gv}_{col}: {min_value}")
-                        global_aggregates[int(gv) -1].append(min_value)
-
-                    elif agg == 'max':
-                        # Maximum of 'col' values
-                        max_value = max(r[col] for r in row if col in r)
-                        print(f"Max of {col} for {agg}_{gv}_{col}: {max_value}")
-                        global_aggregates[int(gv) -1].append(max_value)
-
-                    elif agg == 'count':
-                        # Count of rows
-                        count = len(row)
-                        print(f"Count of rows for {agg}_{gv}_{col}: {count}")
-                        global_aggregates[int(gv)].append(count)
-
-
-
-      
     aggregates = {agg: [] for agg in mf_struct['F']}
-    global_aggregates = [[] for _ in range(mf_struct['n'])]
+    # global_aggregates = [[] for _ in range(mf_struct['n'])]
     for index,(group_key, bitmap) in enumerate(bitmaps.items()):
+
+        group_entry = {attr: val for attr, val in zip(mf_struct['V'], group_key)}
+        group_entry.update({agg: [] for agg in mf_struct['F']})  # Initialize aggregates as empty lists
+        
         local_aggregate_rows = [[] for _ in range(mf_struct['n'])]
         relevant_rows = extract_rows_bitmap(bitmap, _all_sales)
         for row in relevant_rows:
@@ -128,61 +83,47 @@ def query():
                 # Sum of 'col' values
                 total_value = sum(row[col] for row in local_rows if col in row)
                 print(f"Sum of {col} for {agg}_{gv}_{col}: {total_value}")
-                global_aggregates[int(gv) - 1].append(total_value)
+                # global_aggregates[int(gv) - 1].append(total_value)
+                group_entry[agg_header] = total_value
 
             elif agg == 'avg':
                 # Average of 'col' values
                 total_value = sum(row[col] for row in local_rows if col in row)
                 average_value = total_value / len(local_rows) if local_rows else 0
                 print(f"Average of {col} for {agg}_{gv}_{col}: {average_value:.2f}")
-                global_aggregates[int(gv) - 1].append(average_value)
+                # global_aggregates[int(gv) - 1].append(average_value)
+                group_entry[agg_header] = average_value
 
             elif agg == 'min':
                 # Minimum of 'col' values
                 min_value = min(row[col] for row in local_rows if col in row)
                 print(f"Min of {col} for {agg}_{gv}_{col}: {min_value}")
-                global_aggregates[int(gv) - 1].append(min_value)
+                # global_aggregates[int(gv) - 1].append(min_value)
+                group_entry[agg_header] = min_value
 
             elif agg == 'max':
                 # Maximum of 'col' values
                 max_value = max(row[col] for row in local_rows if col in row)
                 print(f"Max of {col} for {agg}_{gv}_{col}: {max_value}")
-                global_aggregates[int(gv) - 1].append(max_value)
+                # global_aggregates[int(gv) - 1].append(max_value)
+                group_entry[agg_header] = max_value
+                
 
             elif agg == 'count':
                 # Count of rows
                 count = len(local_rows)
                 print(f"Count of rows for {agg}_{gv}_{col}: {count}")
-                global_aggregates[int(gv) - 1].append(count)      
-    
-          
-        # calculate_and_append_aggregates( local_aggregate_rows, global_aggregates)            
+                # global_aggregates[int(gv) - 1].append(count)  
+                group_entry[agg_header] = count    
+        
+        _global.append(group_entry)          
         print(group_key, 'done')
-           
-        # print(_global[0]['cust'].append(group_key))  
 
-       
-  
-
-        # loop to calculate aggregates and append to global_aggregates
-        # for i, local_rows in enumerate(local_aggregate_rows):
-        #     if local_rows:
-        #         # Calculate the average of the 'quant' field (assuming 'quant' is the column for quantity)
-        #         total_quant = sum(row['quant'] for row in local_rows if 'quant' in row)
-        #         average_quant = total_quant / len(local_rows) if local_rows else 0
-        #         print(f"Average of quant for avg_{i+1}_quant: {average_quant:.2f}")
-        #         global_aggregates[i].append(average_quant)
-                
-        #     else:
-        #         print(f"No data available for avg_{i+1}_quant.")
-
-
-    print(global_aggregates)
     # STEPS TO DO
     # make local_quant_rows & global_aggregates general made off n? (DONE)
     # make a function to extract aggregates input (mf_struct['F'], local_quant_rows) Output: calculates and appends aggregate to global_aggregates , switch case? (DONE)
     # make sure parse_condition is general
-    # mapping distict customers and the global_aggregates to the _global column IMP!!!!!
+    # mapping distict customers and the global_aggregates to the _global column IMP!!!!! (DONE)
 
     # LATER TO DO
     # TESTING try with having, where, other grouping arributes, no such that
