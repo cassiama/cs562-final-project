@@ -112,9 +112,7 @@ def query():
     for index,(group_key, bitmap) in enumerate(bitmaps.items()):
         local_aggregate_rows = [[] for _ in range(mf_struct['n'])]
         relevant_rows = extract_rows_bitmap(bitmap, _all_sales)
-        for aggregate_index,aggregate in enumerate(mf_struct['F']):
-            
-            for row in relevant_rows:
+        for row in relevant_rows:
                 for index, condition in enumerate(mf_struct['C']):
                 # Parse the condition dynamically
                     parsed_condition = parse_condition(condition, group_key, mf_struct['V'])
@@ -126,9 +124,6 @@ def query():
             agg_header = mf_struct['F'][i]
             split_values = agg_header.split('_')
             agg, gv, col = split_values
-
-            print('Processing:', agg_header)
-
             if agg == 'sum':
                 # Sum of 'col' values
                 total_value = sum(row[col] for row in local_rows if col in row)
@@ -185,7 +180,7 @@ def query():
     print(global_aggregates)
     # STEPS TO DO
     # make local_quant_rows & global_aggregates general made off n? (DONE)
-    # make a function to extract aggregates input (mf_struct['F'], local_quant_rows) Output: calculates and appends aggregate to global_aggregates , switch case?
+    # make a function to extract aggregates input (mf_struct['F'], local_quant_rows) Output: calculates and appends aggregate to global_aggregates , switch case? (DONE)
     # make sure parse_condition is general
     # mapping distict customers and the global_aggregates to the _global column IMP!!!!!
 
