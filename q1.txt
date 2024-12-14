@@ -1,11 +1,11 @@
 SELECT ATTRIBUTE(S):
-cust, sum_1_quant, sum_2_quant, sum_3_quant
+cust, count_1_quant, count_2_quant, count_3_quant
 NUMBER OF GROUPING VARIABLES(n):
 3
 GROUPING ATTRIBUTES(V):
 cust
 F-VECT([F]):
-sum_1_quant, sum_2_quant, sum_3_quant
+count_1_quant, count_2_quant, count_3_quant
 SELECT CONDITION-VECT([C]):
 1.cust = cust and 1.state = 'NY'
 2.cust = cust and 2.state = 'NJ'
