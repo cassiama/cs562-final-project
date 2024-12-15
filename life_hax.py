@@ -31,10 +31,9 @@ def query():
     if option == '1':
         mf_struct = mf_struct_from_user_input()
     elif option == '2':
-        # code for reading from input file
         input_file_no = int(input("Input number for input file: "))
         mf_struct = mf_struct_from_input_file(input_file_no)
-        print(mf_struct)
+    print(mf_struct)
     
     # get all the rows from table
     rows = cur.fetchall()
@@ -223,6 +222,8 @@ def query():
             _global = temp_global   
         else:
             _global = [{col_header: None for col_header in mf_struct['S']}]
+
+    print(len(_global))
     return tabulate.tabulate(_global,
                         headers="keys", tablefmt="psql")
 

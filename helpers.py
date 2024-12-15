@@ -1,7 +1,13 @@
 import tabulate, re
 from collections import defaultdict
+from datetime import datetime
 
 sales_columns = ['cust', 'prod', 'day', 'month', 'year', 'state', 'quant', 'date']
+sales_columns_types = {
+    'int': ['day', 'month', 'year', 'quant'],
+    'datetime': ['date'],
+    'str': ['cust', 'prod', 'state']
+}
 sql_aggregates = ['avg', 'count', 'min', 'max', 'sum']
 sql_cond_ops = ['and', 'or', 'not']
 sql_comparison_ops = ['=', '>', '<', '>=', '<=', '<>']
@@ -92,7 +98,7 @@ def validate_condition(
 def mf_struct_from_user_input():
         mf_struct = {}
         n_gv = 0
-        select_attr = group_attr = where_conds = aggregates = select_conds = having_conds = []
+        select_attr = group_attr = where_clause = aggregates = select_conds = having_conds = []
 
         args_parsed = 0
         max_args = 7
@@ -450,7 +456,13 @@ def parse_condition(condition: str, group_key, grouping_attributes):
 
             # Replace occurrences of the attribute, ensuring it is isolated with spaces around it
             # We also handle the case where it's at the start or end of the string.
-            condition = re.sub(rf"(?<=\s){attr}(?=\s)", f"'{value}'", condition)
+            if attr in sales_columns_types['str']:
+                condition = re.sub(rf"(?<=\s){attr}(?=\s)", f"'{value}'", condition)
+            elif attr in sales_columns_types['int']:
+                condition = re.sub(rf"(?<=\s){attr}(?=\s)", f"{value}", condition)
+            else:
+                year, month, day = value.split("-")
+                condition = re.sub(rf"(?<=\s){attr}(?=\s)", f"{datetime(year, month, day)}", condition)
     
     def convert_dot_notation_to_dict_key(condition):
         condition = re.sub(r'row\.(\w+)', r'row["\1"]', condition)
@@ -475,13 +487,6 @@ def parse_where_condition(condition):
     # Step 4: Convert dot notation (e.g., row.col) to dictionary key notation (row["col"])
     condition = re.sub(r"row\.(\w+)", r'row["\1"]', condition)
 
-    return condition    
-
-
-    
-
-
-    condition = convert_dot_notation_to_dict_key(condition)
     return condition
     
 def parse_having_condition(condition):
