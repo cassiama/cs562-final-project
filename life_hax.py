@@ -65,6 +65,7 @@ def query():
                 for row in relevant_rows:
                     if eval(parsed_where_condition):
                         relevant_where_rows.append(row)
+                print('Where ROWS', relevant_where_rows)
 
 
             # Initialize aggregation columns

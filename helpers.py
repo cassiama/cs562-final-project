@@ -1,6 +1,6 @@
 import tabulate, re
 from collections import defaultdict
-from datetime import datetime
+import datetime
 
 sales_columns = ['cust', 'prod', 'day', 'month', 'year', 'state', 'quant', 'date']
 sales_columns_types = {
@@ -462,7 +462,7 @@ def parse_condition(condition: str, group_key, grouping_attributes):
                 condition = re.sub(rf"(?<=\s){attr}(?=\s)", f"{value}", condition)
             else:
                 year, month, day = value.split("-")
-                condition = re.sub(rf"(?<=\s){attr}(?=\s)", f"{datetime(year, month, day)}", condition)
+                condition = re.sub(rf"(?<=\s){attr}(?=\s)", f"{datetime.datetime(year, month, day)}", condition)
     
     def convert_dot_notation_to_dict_key(condition):
         condition = re.sub(r'row\.(\w+)', r'row["\1"]', condition)
@@ -475,31 +475,73 @@ def parse_condition(condition: str, group_key, grouping_attributes):
     return condition
     
 def parse_where_condition(condition):
-    # Step 1: Replace " = " with " == " (must include spaces around equal sign)
+    # Debug: Output original condition
+    # print(f"Original condition: {condition}")
+    
+    # Step 1: Replace " = " with " == " (for equality)
     condition = condition.replace(" = ", " == ")
-    sales_columns = ['cust', 'prod', 'day', 'month', 'year', 'state', 'quant', 'date']
 
-    # Step 2: Prefix column names in sales_columns with 'row.' if they exist in the string
-    for col in sales_columns:
-        # Use regex to ensure matching isolated column names
-        condition = re.sub(rf"\b{col}\b", f"row.{col}", condition)
+    # Flatten all columns into a single list
+    all_columns = sum(sales_columns_types.values(), [])
 
-    # Step 4: Convert dot notation (e.g., row.col) to dictionary key notation (row["col"])
-    condition = re.sub(r"row\.(\w+)", r'row["\1"]', condition)
+    # Step 3: Add row[] prefixes to column names
+    def prefix_with_row(match):
+        column_name = match.group(1)
+        return f'row["{column_name}"]'
 
+    # Match isolated column names and prefix them with row[]
+    column_pattern = r'\b(' + '|'.join(re.escape(col) for col in all_columns) + r')\b'
+    condition = re.sub(column_pattern, prefix_with_row, condition)
+
+    # Step 4: Handle datetime literals, only if they exist
+    def convert_datetime_literals(match):
+        literal = match.group(1)
+        try:
+            # Parse the string as a datetime object
+            datetime_obj = datetime.datetime.strptime(literal, "%Y-%m-%d")
+            # Replace with Python's datetime format
+            return f'"{datetime_obj.date()}"'
+        except ValueError:
+            # If not a valid datetime, leave it as-is
+            return f"'{literal}'"
+
+    # Check for and process datetime literals (e.g., '2024-12-31')
+    condition = re.sub(r"'(\d{4}-\d{2}-\d{2})'", convert_datetime_literals, condition)
+
+    # Debug: Output transformed condition
+    print(f"Transformed condition: {condition}")
     return condition
     
 def parse_having_condition(condition):
-    # Step 1: Replace " = " with " == " for equality
-    condition = condition.replace(" = ", " == ")
+    # Debug step: Output initial condition
+    # print(f"Original condition: {condition}")
     
-    # Step 2: Add row prefixes to identifiers but skip logical operators and keywords
-    keywords = {"and", "or"}
-    condition = re.sub(
-        r'\b(\w+)\b',  # Match words (identifiers or keywords)
-        lambda match: f'row["{match.group(1)}"]' if match.group(1) not in keywords else match.group(1),
-        condition
-    )
+    # Step 1: Identify comparison operators
+    comparison_operators = r"(<=|>=|<|>|==|!=)"
+    
+    # Step 2: Add row[] prefix to identifiers
+    def add_row_prefix(match):
+        identifier = match.group(1)
+        # Assume all identifiers not explicitly marked as logical or operators are valid columns
+        return f'row["{identifier}"]'
+
+    # Step 3: Split and process around operators
+    def transform_condition(condition):
+        parts = re.split(comparison_operators, condition)
+        transformed = []
+        for i, part in enumerate(parts):
+            part = part.strip()
+            # Only add row[] prefix to non-operators
+            if i % 2 == 0:  # Operands
+                part = re.sub(r'\b([a-zA-Z_][a-zA-Z0-9_]*)\b', add_row_prefix, part)
+            transformed.append(part)
+        return " ".join(transformed)
+    
+    # Step 4: Apply transformation
+    condition = transform_condition(condition)
+    
+    # Debug step: Output final transformed condition
+    # print(f"Transformed condition: {condition}")
     
     return condition
     
