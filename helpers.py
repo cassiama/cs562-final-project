@@ -158,9 +158,8 @@ def parse_condition(condition: str, group_key, grouping_attributes):
     return condition
     
 def parse_where_condition(condition):
-    # Step 1: Clean up whitespace around equality operators
-    condition = re.sub(r"\s*=\s*", " == ", condition)
-    condition = condition.strip()  # Remove leading and trailing whitespace
+    # Step 1: Replace " = " with " == " (must include spaces around equal sign)
+    condition = condition.replace(" = ", " == ")
     sales_columns = ['cust', 'prod', 'day', 'month', 'year', 'state', 'quant', 'date']
 
     # Step 2: Prefix column names in sales_columns with 'row.' if they exist in the string
