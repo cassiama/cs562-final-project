@@ -20,8 +20,21 @@ def query():
     cur = conn.cursor()
     cur.execute("SELECT * FROM sales")
     _global = []
+
+
+    # take user input
+    # input_file_no = 0
+    # mf_struct = {}
+    # option = input("Choose 1 to input arguments manually\nChoose 2 to select input file")
+    # if int(option) == 1:
+    #     # insert code for parsing arguments manually
+    #     while True:
+    #         pass
+    # else:
+    #     # code for reading from input file
+    #     pass
     
-    input_file_no = 4
+    input_file_no = 5
     mf_struct = mf_struct_from_input_file(input_file_no)
     print(mf_struct)
     
@@ -32,7 +45,7 @@ def query():
 
     # add each row to  _all_sales
     for row in rows:
-         _all_sales.append(dict(row)) 
+         _all_sales.append(dict(row))
     # STEP 1
     '''
     Partition R according to the grouping attributes into buckets. Read in a bucket and process each group. If a group has size g, then create n bitmaps b_1, ..., b_n of length g. The bitmaps encode the underlying R_i relations in the definition of Φ^n (on the current group). We process each group according to the following steps.

@@ -1,5 +1,5 @@
 SELECT ATTRIBUTE(S):
-cust, count_1_quant, count_2_quant, count_3_quant
+cust, prod, count_1_quant, count_2_quant, count_3_quant
 NUMBER OF GROUPING VARIABLES(n):
 3
 GROUPING ATTRIBUTES(V):
