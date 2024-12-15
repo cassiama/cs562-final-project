@@ -4,7 +4,7 @@ import psycopg2
 import psycopg2.extras
 import tabulate
 from dotenv import load_dotenv
-from helpers import mf_struct_from_input_file,main_algoritm,print_dict_as_table,create_bitmaps,extract_rows_bitmap,parse_condition,parse_where_condition
+from helpers import mf_struct_from_input_file,main_algoritm,print_dict_as_table,create_bitmaps,extract_rows_bitmap,parse_condition,parse_where_condition,parse_having_condition
 
 # THIS IS A FILE FOR TESTING PURPOSES, PLEASE DELETE AT THE END OF PROJECT
 
@@ -148,14 +148,24 @@ def query():
     # FINAL TODOS
     # make sure parse_condition is general
     # TESTING try with having,
-    # migrate all this to generator 
+    # migrate all this to generator
     # add user input capablilty
 
     # PPT
     # make ppt
-    
 
-    
+    # having clause processing
+    if 'G' in mf_struct.keys():
+        parsed_having_condition = parse_having_condition(mf_struct['G'][0])
+        temp_global = []
+        for row in _global:
+            if  eval(parsed_having_condition):
+                temp_global.append(row)
+        if len(temp_global) >= 1:
+            _global = temp_global   
+        else:
+            _global = [{col_header: None for col_header in mf_struct['S']}]
+
     return tabulate.tabulate(_global,
                         headers="keys", tablefmt="psql")
 
