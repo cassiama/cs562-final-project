@@ -4,7 +4,7 @@ import psycopg2
 import psycopg2.extras
 import tabulate
 from dotenv import load_dotenv
-from helpers import mf_struct_from_input_file,print_dict_as_table,create_bitmaps,extract_rows_bitmap,parse_condition,parse_where_condition,parse_having_condition
+from helpers import validate_attribute,validate_aggregate,validate_condition,mf_struct_from_input_file,mf_struct_from_user_input,main_algoritm,print_dict_as_table,create_bitmaps,extract_rows_bitmap,parse_condition,parse_where_condition,parse_having_condition
 
 # THIS IS A FILE FOR TESTING PURPOSES, PLEASE DELETE AT THE END OF PROJECT
 
@@ -23,20 +23,18 @@ def query():
 
 
     # take user input
-    # input_file_no = 0
-    # mf_struct = {}
-    # option = input("Choose 1 to input arguments manually\nChoose 2 to select input file")
-    # if int(option) == 1:
-    #     # insert code for parsing arguments manually
-    #     while True:
-    #         pass
-    # else:
-    #     # code for reading from input file
-    #     pass
-    
-    input_file_no = 1
-    mf_struct = mf_struct_from_input_file(input_file_no)
-    print(mf_struct)
+    input_file_no = 0
+    mf_struct = {}
+    option = input("Choose: \n1 to input arguments manually.\n2 to select input file.\n")
+    while option != '1' and option != '2':
+        option = input('Invalid option. Please try again:\nChoose: \n1 to input arguments manually.\n2 to select input file.\n')
+    if option == '1':
+        mf_struct = mf_struct_from_user_input()
+    elif option == '2':
+        # code for reading from input file
+        input_file_no = int(input("Input number for input file: "))
+        mf_struct = mf_struct_from_input_file(input_file_no)
+        print(mf_struct)
     
     # get all the rows from table
     rows = cur.fetchall()
@@ -210,7 +208,7 @@ def query():
 
     # TESTING try with other grouping attributes
     # CODE migrate all this to generator
-    # FEATURE add user input capablilty
+    # FEATURE add user input capablilty (DONE)
     # bug : 'date' datatype , 'int' datatypes dont aggregate  , make separate parsing conditions for string, date, and int, change parse_condition, parse_where_condition, parse_having_condition , and test all input files
     # make PPT
 
