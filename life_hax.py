@@ -218,8 +218,8 @@ def query():
     # add user input capablilty
 
     # FINAL TODOS
-    # make sure parse_condition is general
-    # TESTING try with having,
+    # make sure parse_condition is general (DONE)
+    # TESTING try with having, (DONE)
     # migrate all this to generator
     # add user input capablilty
 
