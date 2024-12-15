@@ -1,0 +1,14 @@
+SELECT ATTRIBUTE(S):
+cust, max_quant, avg_quant
+NUMBER OF GROUPING VARIABLES(n):
+0
+GROUPING ATTRIBUTES(V):
+cust
+WHERE CLAUSE(W):
+prod = 'Ham'
+F-VECT([F]):
+-
+SELECT CONDITION-VECT([C]):
+-
+HAVING CLAUSE (G):
+-
