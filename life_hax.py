@@ -21,7 +21,7 @@ def query():
     cur.execute("SELECT * FROM sales")
     _global = []
     
-    input_file_no = 2
+    input_file_no = 4
     mf_struct = mf_struct_from_input_file(input_file_no)
     print(mf_struct)
     
@@ -124,7 +124,7 @@ def query():
     # STEPS TO DO
     # make local_quant_rows & global_aggregates general made off n? (DONE)
     # make a function to extract aggregates input (mf_struct['F'], local_quant_rows) Output: calculates and appends aggregate to global_aggregates , switch case? (DONE)
-    # make sure parse_condition is general
+    # make sure parse_condition is general (DONE)
     # mapping distict customers and the global_aggregates to the _global column IMP!!!!! (DONE)
 
     # LATER TO DO

@@ -128,12 +128,10 @@ def main_algoritm(mf_struct):
     algoritm = "\n".join(generated_code)
     return algoritm
 
-def parse_condition(condition, group_key, grouping_attributes):
+def parse_condition(condition: str, group_key, grouping_attributes):
 
-    # Step 1: Clean up whitespace around equality operators (optional)
-    condition = re.sub(r"\s*=\s*", " == ", condition)  # uncomment if needed
-
-    condition = condition.strip()  # Remove leading and trailing whitespace
+    # Step 1: Replace " = " with " == " (must include spaces around equal sign)
+    condition = condition.replace(" = ", " == ")
 
     # Step 2: Replace any prefix before a dot (.) with 'row.'
     condition = re.sub(r'\b\w+\.', 'row.', condition)
