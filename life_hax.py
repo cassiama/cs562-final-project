@@ -128,9 +128,20 @@ def query():
     # mapping distict customers and the global_aggregates to the _global column IMP!!!!! (DONE)
 
     # LATER TO DO
-    # TESTING try with having, where, other grouping arributes, no such that
+    # TESTING try with having, where (DONE), other grouping arributes, no such that
     # migrate all this to generator 
     # add user input capablilty
+
+    # FINAL TODOS
+    # make sure parse_condition is general
+    # TESTING try with having,
+    # migrate all this to generator 
+    # add user input capablilty
+
+    # PPT
+    # make ppt
+    
+
     
     return tabulate.tabulate(_global,
                         headers="keys", tablefmt="psql")
