@@ -4,7 +4,7 @@ import psycopg2
 import psycopg2.extras
 import tabulate
 from dotenv import load_dotenv
-from helpers import mf_struct_from_input_file,main_algoritm,print_dict_as_table,create_bitmaps,extract_rows_bitmap,parse_condition,parse_where_condition,parse_having_condition
+from helpers import mf_struct_from_input_file,print_dict_as_table,create_bitmaps,extract_rows_bitmap,parse_condition,parse_where_condition,parse_having_condition
 
 # THIS IS A FILE FOR TESTING PURPOSES, PLEASE DELETE AT THE END OF PROJECT
 
@@ -153,6 +153,7 @@ def query():
                     # Parse the condition dynamically
                         
                         parsed_condition = parse_condition(condition, group_key, mf_struct['V'])
+                        # print(parsed_condition)
                         if where_condition != '-':
                             full_condition = f"{parsed_condition} and {where_condition}"
                         else:
@@ -205,26 +206,13 @@ def query():
             
             _global.append(group_entry)    
       
+    # FINAL todo
 
-    # STEPS TO DO
-    # make local_quant_rows & global_aggregates general made off n? (DONE)
-    # make a function to extract aggregates input (mf_struct['F'], local_quant_rows) Output: calculates and appends aggregate to global_aggregates , switch case? (DONE)
-    # make sure parse_condition is general (DONE)
-    # mapping distict customers and the global_aggregates to the _global column IMP!!!!! (DONE)
-
-    # LATER TO DO
-    # TESTING try with having (DONE) , where (DONE), other grouping arributes, no such that (DONE)
-    # migrate all this to generator 
-    # add user input capablilty
-
-    # FINAL TODOS
-    # make sure parse_condition is general (DONE)
-    # TESTING try with having, (DONE)
-    # migrate all this to generator
-    # add user input capablilty
-
-    # PPT
-    # make ppt
+    # TESTING try with other grouping attributes
+    # CODE migrate all this to generator
+    # FEATURE add user input capablilty
+    # bug : 'date' datatype , 'int' datatypes dont aggregate  , make separate parsing conditions for string, date, and int, change parse_condition, parse_where_condition, parse_having_condition , and test all input files
+    # make PPT
 
     # having clause processing
     if 'G' in mf_struct.keys():
@@ -237,7 +225,6 @@ def query():
             _global = temp_global   
         else:
             _global = [{col_header: None for col_header in mf_struct['S']}]
-
     return tabulate.tabulate(_global,
                         headers="keys", tablefmt="psql")
 

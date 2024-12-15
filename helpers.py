@@ -99,12 +99,6 @@ def create_bitmaps(full_table, grouping_attributes):
 
     return bitmaps
 
-def parse_gv_predicates(gv_predicates):
-   
-   conditions = []
-   # still need to implement later
-   
-   return conditions
 
 def extract_rows_bitmap(bitmap, full_table):
     rows = []
@@ -115,18 +109,7 @@ def extract_rows_bitmap(bitmap, full_table):
 
     return rows
 
-def main_algoritm(mf_struct):
-    
-    generated_code = []
-
-    for gv_predicates in mf_struct['C']:
-        conditions = parse_gv_predicates(gv_predicates)
-        generated_code.append(f"if {conditions}:")
-        generated_code.append("    _buckets.append(row)")
-
-    # Generate the final algorithm block
-    algoritm = "\n".join(generated_code)
-    return algoritm
+# bug : 'date' datatype , 'int' datatypes dont aggregate  , make separate parsing conditions for string, date, and int, change parse_condition, parse_where_condition, parse_having_condition , and test all input files
 
 def parse_condition(condition: str, group_key, grouping_attributes):
 
@@ -172,29 +155,7 @@ def parse_where_condition(condition):
 
     return condition    
 
-def parse_condition(condition: str, group_key, grouping_attributes):
 
-    # Step 1: Replace " = " with " == " (must include spaces around equal sign)
-    condition = condition.replace(" = ", " == ")
-
-    # Step 2: Replace any prefix before a dot (.) with 'row.'
-    condition = re.sub(r'\b\w+\.', 'row.', condition)
-
-    # Step 3: find any instances of grouping_attributes eg "if \scust\s exist take its index", then replace it with group_key[index]
-    for attr in grouping_attributes:
-        # Find the index of the attribute in grouping_attributes
-        if attr in condition:
-            attr_index = grouping_attributes.index(attr)  # Find the index of the attribute
-            value = group_key[attr_index]  # Get the corresponding value from group_key
-
-            # Replace occurrences of the attribute, ensuring it is isolated with spaces around it
-            # We also handle the case where it's at the start or end of the string.
-            condition = re.sub(rf"(?<=\s){attr}(?=\s)", f"'{value}'", condition)
-    
-    def convert_dot_notation_to_dict_key(condition):
-        condition = re.sub(r'row\.(\w+)', r'row["\1"]', condition)
-    
-        return condition
     
 
 
@@ -215,5 +176,5 @@ def parse_having_condition(condition):
     
     return condition
     
-def print_dict_as_table(array):
-    print(tabulate.tabulate(array,headers="keys", tablefmt="psql"))  
+def print_dict_as_table(dict):
+    print(tabulate.tabulate(dict,headers="keys", tablefmt="psql"))  
