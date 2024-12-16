@@ -65,7 +65,7 @@ def query():
                 for row in relevant_rows:
                     if eval(parsed_where_condition):
                         relevant_where_rows.append(row)
-                print('Where ROWS', relevant_where_rows)
+               
 
 
             # Initialize aggregation columns
@@ -224,7 +224,6 @@ def query():
         else:
             _global = [{col_header: None for col_header in mf_struct['S']}]
 
-    print(len(_global))
     return tabulate.tabulate(_global,
                         headers="keys", tablefmt="psql")
 

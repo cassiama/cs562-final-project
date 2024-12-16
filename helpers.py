@@ -119,7 +119,7 @@ def mf_struct_from_user_input():
                 valid_column = validate_attribute(select_attr[0])
                 if len(select_attr) == 1:
                     if not valid_column:
-                        print(f'Invalid argument parsed: {select_attr[0]}. Try again.')
+                        print(f"Invalid argument parsed: {select_attr[0]}. Try again.")
                         invalid_args.clear()
                         continue
                     possible_columns.append(select_attr[0])
@@ -136,7 +136,7 @@ def mf_struct_from_user_input():
                             possible_columns.append(attr)
                             
                     if len(invalid_args) > 0:
-                        print(f'Invalid argument parsed: {', '.join(invalid_args)}. Try again.')
+                        print(f"Invalid argument parsed: {', '.join(invalid_args)}. Try again.")
                         invalid_args.clear()
                         continue
 
@@ -151,7 +151,7 @@ def mf_struct_from_user_input():
                 try:
                     n_gv = int(input('How many grouping variables?\n'))
                     if n_gv < 0:
-                        print(f'Invalid argument parsed: {n_gv}. Try again')
+                        print(f"Invalid argument parsed: {n_gv}. Try again")
                         invalid_args.clear()
                         continue
 
@@ -159,7 +159,7 @@ def mf_struct_from_user_input():
                     args_parsed += 1
                     invalid_args.clear()
                 except ValueError:
-                    print(f'Invalid argument parsed: {n_gv}. Try again')
+                    print(f"Invalid argument parsed: {n_gv}. Try again")
                     invalid_args.clear()
                     continue
 
@@ -176,7 +176,7 @@ def mf_struct_from_user_input():
                 # check if it's a valid sales column
                 valid_column = validate_attribute(group_attr[0])
                 if len(group_attr) == 1 and not valid_column:
-                    print(f'Invalid argument parsed: {group_attr[0]}. Try again.')
+                    print(f"Invalid argument parsed: {group_attr[0]}. Try again.")
                     invalid_args.clear()
                     continue
 
@@ -190,7 +190,7 @@ def mf_struct_from_user_input():
                             invalid_args.append(attr)
                             
                     if len(invalid_args) > 0:
-                        print(f'Invalid argument parsed: {', '.join(invalid_args)}. Try again.')
+                        print(f"Invalid argument parsed: {', '.join(invalid_args)}. Try again.")
                         invalid_args.clear()
                         continue
 
@@ -236,7 +236,7 @@ def mf_struct_from_user_input():
                         invalid_args.append(agg)
                 
                 if len(invalid_args) > 0:
-                    print(f'Invalid argument parsed: {', '.join(invalid_args)}. All aggregates you input must be present in the SELECT clause. Try again.\n')
+                    print(f"Invalid argument parsed: {', '.join(invalid_args)}. All aggregates you input must be present in the SELECT clause. Try again.\n")
                     invalid_args.clear()
                     continue
 
@@ -278,7 +278,7 @@ def mf_struct_from_user_input():
                     select_conds.append(such_that_clause)
                 
                 if len(invalid_args) > 0:
-                    print(f'Invalid argument parsed: {', '.join(invalid_args)}')
+                    print(f"Invalid argument parsed: {', '.join(invalid_args)}")
                     invalid_args.clear()
                     continue
 
@@ -319,7 +319,7 @@ def mf_struct_from_user_input():
                     having_conds.append(having_clause)
                 
                 if len(invalid_args) > 0:
-                    print(f'Invalid argument parsed: {', '.join(invalid_args)}')
+                    print(f"Invalid argument parsed: {', '.join(invalid_args)}")
                     invalid_args.clear()
                     continue
 
