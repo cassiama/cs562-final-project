@@ -25,9 +25,9 @@ def query():
         input_file_no = int(input("Input number for input file: "))
     filepath = f'./q{input_file_no}_sql.txt'
     with open(filepath, "r") as f:
-        ere = f.read()
+        phi = f.read()
 
-    cur.execute(ere)
+    cur.execute(phi)
 
     return tabulate.tabulate(cur.fetchall(),
                              headers="keys", tablefmt="psql")

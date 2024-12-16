@@ -7,20 +7,6 @@ def main():
     needed to run the query. That generated code should be saved to a 
     file (e.g. _generated.py) and then run.
     """
-    
-
-    '''
-    While(1) {
-        Read(row)
-        If (row.cust in mf_struct) {
-            Update aggregates in mf_struct
-        } else {
-            Add row.cust to mf_struct
-            Initialize the aggregate
-        }
-    }
-    Output mf_struct
-    '''
 
     body = """
     # take user input

@@ -242,10 +242,10 @@ def mf_struct_from_user_input():
 
                 else:
                     for attr in group_attr:
-                        # check if it's a valid sales column or an aggregate first
+                        # check if it's a valid sales column first
                         valid_column = validate_attribute(attr)
                         valid_aggregate = validate_aggregate(attr)
-                        if not valid_column and not valid_aggregate:
+                        if not valid_column:
                             # if not, then add it to the invalid arguments
                             invalid_args.append(attr)
                             
@@ -390,48 +390,146 @@ Returns a 'mf_struct' dictionary from given input file.
 def mf_struct_from_input_file(input_file_no):
 
     filepath = f'./q{input_file_no}.txt'
-    ere = []
+    phi = []
+    invalid_args = []
+    possible_columns = []
     with open(filepath, "r") as f:
-        ere = f.read().splitlines()
+        phi = f.read().splitlines()
 
     mf_struct = {}
-    # print(ere)
     n_gv = 0
-    select_attr = group_attr = aggregates = select_conds = having_conds = where_clause =  []
+    select_attr = []
+    group_attr = []
+    aggregates = []
+    select_conds = []
+    having_conds = []
+    where_clause =  []
     
     # get the select attributes
-    select_attr = ere[ere.index("SELECT ATTRIBUTE(S):") + 1].split(", ")
+    temp_select = phi[phi.index("SELECT ATTRIBUTE(S):") + 1]
+    # if there are multiple attributes...
+    if ',' in temp_select:
+        temp_select = temp_select.split(",")
+        for attr in temp_select:
+            attr = attr.strip()
+            if validate_attribute(attr):
+                possible_columns.append(attr)
+            if validate_attribute(attr) or validate_aggregate(attr):
+                select_attr.append(attr)
+            else:
+                invalid_args.append(attr)
+    else:
+        if validate_attribute(temp_select):
+            possible_columns.append(temp_select)
+        if validate_attribute(temp_select) or validate_aggregate(temp_select):
+            select_attr.append(temp_select)
+        else:
+            invalid_args.append(temp_select)
+        
     for attr in select_attr:
         mf_struct[attr] = []
     mf_struct['S'] = select_attr
 
     # get the number of grouping variables
-    n_gv = int(ere[ere.index("NUMBER OF GROUPING VARIABLES(n):") + 1])
-    mf_struct['n'] = n_gv
+    temp_n = phi[phi.index("NUMBER OF GROUPING VARIABLES(n):") + 1]
+    # check the number of grouping variables parsed is valid
+    try:
+        n_gv = int(temp_n)
+        if n_gv < 0:
+            raise ValueError(f"Invalid argument parsed: {n_gv}. Please modify your input file.")
+        mf_struct['n'] = n_gv
+    except ValueError:
+        raise ValueError(f"Invalid argument parsed: {temp_n}. Please modify your input file.")
 
     # get the grouping attributes
-    group_attr = ere[ere.index("GROUPING ATTRIBUTES(V):") + 1].split(', ')
+    temp_group_attr = phi[phi.index("GROUPING ATTRIBUTES(V):") + 1]
+    # if there are multiple attributes...
+    if ',' in temp_group_attr:
+        temp_group_attr = temp_group_attr.split(",")
+        for attr in temp_group_attr:
+            attr = attr.strip()
+            if validate_attribute(attr):
+                group_attr.append(attr)
+            else:
+                invalid_args.append(attr)
+    else:
+        if validate_attribute(temp_group_attr):
+            group_attr.append(temp_group_attr)
+        else:
+            invalid_args.append(temp_group_attr)
+
     mf_struct['V'] = group_attr
 
     # get the where clause
-    if "WHERE CLAUSE(W):" in ere:
-        where_clause = ere[ere.index("WHERE CLAUSE(W):") + 1]
-        mf_struct['W'] = where_clause if where_clause else '-'
+    if "WHERE CLAUSE(W):" in phi:
+        where_clause = phi[phi.index("WHERE CLAUSE(W):") + 1]
+
+        # make sure the where clause was valid
+        valid_condition = validate_condition(where_clause, mf_struct['n'], possible_columns, grouping_cond=False)
+        if not valid_condition or not where_clause:
+            print(f"Invalid argument parsed: {where_clause}. Please try again.")
+            invalid_args.append(where_clause)
+
+        mf_struct['W'] = where_clause
     else:
         mf_struct['W'] = '-'
 
     # get the aggregates vector
-    aggregates = ere[ere.index("F-VECT([F]):") + 1].split(', ')
+    temp_aggregate = phi[phi.index("F-VECT([F]):") + 1]
+    if temp_aggregate == '-':
+        aggregates.append(temp_aggregate)
+    else:
+        # if there are multiple attributes...
+        if ',' in temp_aggregate:
+            temp_aggregate = temp_aggregate.split(",")
+            for agg in temp_aggregate:
+                agg = agg.strip()
+                # if aggregate not already been parsed in the SELECT clause, add to invalid_args
+                if agg in mf_struct['S'] and validate_aggregate(agg):
+                    aggregates.append(agg)
+                else:
+                    invalid_args.append(agg)
+        else:
+            if validate_attribute(temp_aggregate):
+                possible_columns.append(temp_aggregate)
+            if temp_aggregate in mf_struct['S'] and validate_aggregate(temp_aggregate):
+                aggregates.append(temp_aggregate)
+            else:
+                invalid_args.append(temp_aggregate)
+    
     mf_struct['F'] = aggregates
 
     # get the select condition vector
-    select_conds = ere[ere.index("SELECT CONDITION-VECT([C]):") + 1:ere.index("HAVING CLAUSE (G):")]
+    such_that_clause = phi[phi.index("SELECT CONDITION-VECT([C]):") + 1:phi.index("HAVING CLAUSE (G):")]
+    if such_that_clause[0] == '-':
+        select_conds.extend(such_that_clause)
+    else:
+        for cond in such_that_clause:
+            cond = cond.strip()
+            # make sure the such that clause was valid
+            if validate_condition(cond, mf_struct['n'], possible_columns):
+                select_conds.append(cond)
+            else:
+                invalid_args.append(cond)
+
     mf_struct['C'] = select_conds
     
     # get the having clause vector (if it exists)
-    having_conds = ere[ere.index("HAVING CLAUSE (G):") + 1:]
-    if len(having_conds) >= 1 and having_conds[0] != '-':
+    having_clause = phi[phi.index("HAVING CLAUSE (G):") + 1:]
+    if len(having_clause) == 1 and having_clause[0] != '-':
+        # make sure the having clause was valid
+        valid_condition = validate_condition(having_clause[0], mf_struct['n'], possible_columns, grouping_cond=True, such_that=False)
+        if not valid_condition:
+            invalid_args.append(having_clause)
+
+        having_conds.extend(having_clause)
         mf_struct['G'] = having_conds
+    elif len(having_clause) > 1:
+        invalid_args.append(having_clause[1:])
+        print("HAVING clause must be on a single line.")
+
+    if len(invalid_args) > 0:
+        raise ValueError(f"Invalid argument parsed: {', '.join(invalid_args)}. Please modify your input file.")
 
     return mf_struct
 
