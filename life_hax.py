@@ -43,10 +43,8 @@ def query():
     # add each row to  _all_sales
     for row in rows:
          _all_sales.append(dict(row))
-    # STEP 1
-    '''
-    Partition R according to the grouping attributes into buckets. Read in a bucket and process each group. If a group has size g, then create n bitmaps b_1, ..., b_n of length g. The bitmaps encode the underlying R_i relations in the definition of Φ^n (on the current group). We process each group according to the following steps.
-    '''
+
+    # create bitmap groups     
     bitmaps = create_bitmaps(_all_sales,mf_struct['V'])
 
     # handle normal MF query
@@ -121,24 +119,11 @@ def query():
     else:
         for group_key, bitmap in bitmaps.items():
             bitmaps_rows = extract_rows_bitmap(bitmap, _all_sales)
-            
-            '''
-            # this builds the 1st scan
-            if only 1 group attribute
-                append the bitmaps of group key to _global
-                add group key to group by attr column
-            else
-                preprocess the tuple
-                map according to each column of group by attribute array
-            '''
-            # print_dict_as_table(bitmaps_rows)  
-        # STEP 2
-        '''
-        Make arrays for each grouping variable and calculate the aggregates 
-        '''
+
+        # Make arrays for each grouping variable and calculate the aggregates 
         if mf_struct['W']:
             where_condition = parse_where_condition(mf_struct['W'])
-        # global_aggregates = [[] for _ in range(mf_struct['n'])]
+
         for index,(group_key, bitmap) in enumerate(bitmaps.items()):
 
             group_entry = {attr: val for attr, val in zip(mf_struct['V'], group_key)}
@@ -151,7 +136,7 @@ def query():
                     # Parse the condition dynamically
                         
                         parsed_condition = parse_condition(condition, group_key, mf_struct['V'])
-                        # print(parsed_condition)
+
                         if where_condition != '-':
                             full_condition = f"{parsed_condition} and {where_condition}"
                         else:
@@ -168,50 +153,32 @@ def query():
                 if agg == 'sum':
                     # Sum of 'col' values
                     total_value = sum(row[col] for row in local_rows if col in row)
-                    # print(f"Sum of {col} for {agg}_{gv}_{col}: {total_value}")
-                    # global_aggregates[int(gv) - 1].append(total_value)
                     group_entry[agg_header] = total_value
 
                 elif agg == 'avg':
                     # Average of 'col' values
                     total_value = sum(row[col] for row in local_rows if col in row)
                     average_value = total_value / len(local_rows) if local_rows else 0
-                    # print(f"Average of {col} for {agg}_{gv}_{col}: {average_value:.2f}")
-                    # global_aggregates[int(gv) - 1].append(average_value)
                     group_entry[agg_header] = average_value
 
                 elif agg == 'min':
                     # Minimum of 'col' values
                     min_value = min(row[col] for row in local_rows if col in row)
-                    # print(f"Min of {col} for {agg}_{gv}_{col}: {min_value}")
-                    # global_aggregates[int(gv) - 1].append(min_value)
                     group_entry[agg_header] = min_value
 
                 elif agg == 'max':
                     # Maximum of 'col' values
                     max_value = max(row[col] for row in local_rows if col in row)
-                    # print(f"Max of {col} for {agg}_{gv}_{col}: {max_value}")
-                    # global_aggregates[int(gv) - 1].append(max_value)
                     group_entry[agg_header] = max_value
                     
 
                 elif agg == 'count':
                     # Count of rows
                     count = len(local_rows)
-                    # print(f"Count of rows for {agg}_{gv}_{col}: {count}")
-                    # global_aggregates[int(gv) - 1].append(count)  
                     group_entry[agg_header] = count    
             
             _global.append(group_entry)    
       
-    # FINAL todo
-
-    # TESTING try with other grouping attributes
-    # CODE migrate all this to generator
-    # FEATURE add user input capablilty (DONE)
-    # bug : 'date' datatype , 'int' datatypes dont aggregate  , make separate parsing conditions for string, date, and int, change parse_condition, parse_where_condition, parse_having_condition , and test all input files (DONE)
-    # make PPT
-
     # having clause processing
     if 'G' in mf_struct.keys():
         parsed_having_condition = parse_having_condition(mf_struct['G'][0])

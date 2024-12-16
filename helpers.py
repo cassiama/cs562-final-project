@@ -358,26 +358,19 @@ def mf_struct_from_input_file(input_file_no):
     n_gv = 0
     select_attr = group_attr = aggregates = select_conds = having_conds = where_clause =  []
     
-   
     # get the select attributes
     select_attr = ere[ere.index("SELECT ATTRIBUTE(S):") + 1].split(", ")
-    # print(f"S: {select_attr}")
     for attr in select_attr:
         mf_struct[attr] = []
     mf_struct['S'] = select_attr
-    # uncomment line above if we decide to handle mf_struct differently
 
     # get the number of grouping variables
     n_gv = int(ere[ere.index("NUMBER OF GROUPING VARIABLES(n):") + 1])
-    # print(f"n: {n_gv}")
     mf_struct['n'] = n_gv
-    # uncomment line above if we decide to handle mf_struct differently
 
     # get the grouping attributes
     group_attr = ere[ere.index("GROUPING ATTRIBUTES(V):") + 1].split(', ')
-    # print(f"V: {group_attr}")
     mf_struct['V'] = group_attr
-    # uncomment line above if we decide to handle mf_struct differently
 
     # get the where clause
     if "WHERE CLAUSE(W):" in ere:
@@ -388,33 +381,23 @@ def mf_struct_from_input_file(input_file_no):
 
     # get the aggregates vector
     aggregates = ere[ere.index("F-VECT([F]):") + 1].split(', ')
-    # print(f"F: {aggregates}")
     mf_struct['F'] = aggregates
-    # uncomment line above if we decide to handle mf_struct differently
 
     # get the select condition vector
     select_conds = ere[ere.index("SELECT CONDITION-VECT([C]):") + 1:ere.index("HAVING CLAUSE (G):")]
-    # print(f"C: {select_conds}")
     mf_struct['C'] = select_conds
-    # uncomment line above if we decide to handle mf_struct differently
-
+    
     # get the having clause vector (if it exists)
     having_conds = ere[ere.index("HAVING CLAUSE (G):") + 1:]
     if len(having_conds) >= 1 and having_conds[0] != '-':
-        # print(f"G: {having_conds}")
         mf_struct['G'] = having_conds
-    # uncomment line above if we decide to handle mf_struct differently
-    # print(mf_struct)
-    # print(f"Columns of mf_struct: {list(mf_struct.keys())}")
+
     return mf_struct
 
 def create_bitmaps(full_table, grouping_attributes):
-    # Create a set to find unique values of Grouping attributes
     if len(grouping_attributes) == 1:
-        # Single attribute case: wrap the single attribute value in a tuple
         unique_groups = set((row[grouping_attributes[0]],) for row in full_table)
     else:
-        # Multiple attribute case: create keys as tuples of attribute values
         unique_groups = set(
             tuple(row[attr] for attr in grouping_attributes) for row in full_table
         )
@@ -439,7 +422,6 @@ def create_bitmaps(full_table, grouping_attributes):
                 else:
                     bitmap.append(0)
         
-        # Assign the bitmap to the corresponding group_key
         bitmaps[group_key] = bitmap
 
     return bitmaps
@@ -450,29 +432,21 @@ def extract_rows_bitmap(bitmap, full_table):
 
     for index, bit in enumerate(bitmap):
         if bit == 1:
-            rows.append(full_table[index])  # Add the row if the bitmap value is 1
+            rows.append(full_table[index])  
 
     return rows
 
-# bug : 'date' datatype , 'int' datatypes dont aggregate  , make separate parsing conditions for string, date, and int, change parse_condition, parse_where_condition, parse_having_condition , and test all input files
-
 def parse_condition(condition: str, group_key, grouping_attributes):
 
-    # Step 1: Replace " = " with " == " (must include spaces around equal sign)
     condition = condition.replace(" = ", " == ")
-
-    # Step 2: Replace any prefix before a dot (.) with 'row.'
     condition = re.sub(r'\b\w+\.', 'row.', condition)
 
-    # Step 3: find any instances of grouping_attributes eg "if \scust\s exist take its index", then replace it with group_key[index]
     for attr in grouping_attributes:
-        # Find the index of the attribute in grouping_attributes
-        if attr in condition:
-            attr_index = grouping_attributes.index(attr)  # Find the index of the attribute
-            value = group_key[attr_index]  # Get the corresponding value from group_key
 
-            # Replace occurrences of the attribute, ensuring it is isolated with spaces around it
-            # We also handle the case where it's at the start or end of the string.
+        if attr in condition:
+            attr_index = grouping_attributes.index(attr)  
+            value = group_key[attr_index]  
+
             if attr in sales_columns_types['str']:
                 condition = re.sub(rf"(?<=\s){attr}(?=\s)", f"'{value}'", condition)
             elif attr in sales_columns_types['int']:
@@ -483,83 +457,53 @@ def parse_condition(condition: str, group_key, grouping_attributes):
     
     def convert_dot_notation_to_dict_key(condition):
         condition = re.sub(r'row\.(\w+)', r'row["\1"]', condition)
-    
         return condition
     
-
-
     condition = convert_dot_notation_to_dict_key(condition)
     return condition
     
 def parse_where_condition(condition):
-    # Debug: Output original condition
-    # print(f"Original condition: {condition}")
-    
-    # Step 1: Replace " = " with " == " (for equality)
-    condition = condition.replace(" = ", " == ")
 
-    # Flatten all columns into a single list
+    condition = condition.replace(" = ", " == ")
     all_columns = sum(sales_columns_types.values(), [])
 
-    # Step 3: Add row[] prefixes to column names
     def prefix_with_row(match):
         column_name = match.group(1)
         return f'row["{column_name}"]'
 
-    # Match isolated column names and prefix them with row[]
     column_pattern = r'\b(' + '|'.join(re.escape(col) for col in all_columns) + r')\b'
     condition = re.sub(column_pattern, prefix_with_row, condition)
 
-    # Step 4: Handle datetime literals, only if they exist
     def convert_datetime_literals(match):
         literal = match.group(1)
-        try:
-            # Parse the string as a datetime object
-            datetime_obj = datetime.datetime.strptime(literal, "%Y-%m-%d")
-            # Replace with Python's datetime format
+        try:  
+            datetime_obj = datetime.datetime.strptime(literal, "%Y-%m-%d")   
             return f'"{datetime_obj.date()}"'
         except ValueError:
-            # If not a valid datetime, leave it as-is
             return f"'{literal}'"
 
-    # Check for and process datetime literals (e.g., '2024-12-31')
     condition = re.sub(r"'(\d{4}-\d{2}-\d{2})'", convert_datetime_literals, condition)
-
-    # Debug: Output transformed condition
-    # print(f"Transformed condition: {condition}")
     return condition
     
 def parse_having_condition(condition):
-    # Debug step: Output initial condition
-    # print(f"Original condition: {condition}")
-    
-    # Step 1: Identify comparison operators
     comparison_operators = r"(<=|>=|<|>|==|!=)"
-    
-    # Step 2: Add row[] prefix to identifiers
+
     def add_row_prefix(match):
         identifier = match.group(1)
-        # Assume all identifiers not explicitly marked as logical or operators are valid columns
         return f'row["{identifier}"]'
 
-    # Step 3: Split and process around operators
+
     def transform_condition(condition):
         parts = re.split(comparison_operators, condition)
         transformed = []
         for i, part in enumerate(parts):
             part = part.strip()
-            # Only add row[] prefix to non-operators
-            if i % 2 == 0:  # Operands
+            if i % 2 == 0: 
                 part = re.sub(r'\b([a-zA-Z_][a-zA-Z0-9_]*)\b', add_row_prefix, part)
             transformed.append(part)
         return " ".join(transformed)
     
-    # Step 4: Apply transformation
     condition = transform_condition(condition)
-    
-    # Debug step: Output final transformed condition
-    # print(f"Transformed condition: {condition}")
-    
     return condition
     
 def print_dict_as_table(dict):
