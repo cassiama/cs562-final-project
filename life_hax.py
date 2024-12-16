@@ -209,7 +209,7 @@ def query():
     # TESTING try with other grouping attributes
     # CODE migrate all this to generator
     # FEATURE add user input capablilty (DONE)
-    # bug : 'date' datatype , 'int' datatypes dont aggregate  , make separate parsing conditions for string, date, and int, change parse_condition, parse_where_condition, parse_having_condition , and test all input files
+    # bug : 'date' datatype , 'int' datatypes dont aggregate  , make separate parsing conditions for string, date, and int, change parse_condition, parse_where_condition, parse_having_condition , and test all input files (DONE)
     # make PPT
 
     # having clause processing
