@@ -252,10 +252,10 @@ def mf_struct_from_user_input():
                 # get the aggregates vector
                 aggregates = input("F-VECT([F]):\n")
                 # if empty, start from scratch
-                if not aggregates:
-                    print('Input is empty. Try again.')
-                    print(input_notes)
+                if not aggregates or aggregates == '-':
+                    mf_struct['F'] = ['-']
                     invalid_args.clear()
+                    args_parsed += 1
                     continue
 
                 aggregates = aggregates.split(', ')
