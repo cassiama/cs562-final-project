@@ -12,15 +12,29 @@ The purpose of this project is to generate code that processes E-SQL queries. Ou
 ## How to Run
 
 - Step 0: Download and set up PostgreSQL Server on your machine. Make sure to initialize your credentials and put them in your own .env file.
-- Step 1: Before continuing, we recommend creating a virtual environment first (`python -m venv venv`). Then, install all of the dependencies by running
+- Step 1: Before continuing, we recommend creating a virtual environment first (`python -m venv {your_venv}`).
+- Step 2: Next, activate the virtual environment. It's different for each major OS.
+  - Windows (PowerShell): `{your_venv}\Scripts\activate.ps1`
+  - Windows (Command Prompt): `{your_venv}\Scripts\activate.bat`
+  - Linux/MacOS: `source {your_env}/bin/activate`
+- Step 3: Then, install all of the dependencies by running
 
 ```py
 pip install -r requirements.txt
 ```
 
-- Step 2: Run the `generator.py` file and view the results in `_generated.py`.
+- Step 4: Run the following line:
+```py
+{your_venv}/Scripts/python generator.py
+```
 
-- Step 3: Type '1' to manually input the arguments for the Φ (phi) operator or type '2' to run one of the query text files.
+This *ensures* that it will not give you the following message: `ModuleNotFoundError: No module named 'psycopg2'`. Running it with just `python` **might** work, but it is inconsistent. If you are interested in learning why, [read this article](https://docs.python.org/3/library/venv.html) to get an idea.
+
+Anyway, after running that command in the terminal, `_generated.py` will immediately start running.
+
+- Step 5: Type '1' to manually input the arguments for the Φ (phi) operator or type '2' to run one of the query text files.
+
+Once it has finished running, it will show you the results of your intended E-SQL query.
 
 ## Limitations
-Running the `test_generator.py` file won't work due to adding menus to the `generator.py` and `sql.py` files. In order to verify that the E-SQL queries match the SQL queries, you will have to run and compare the results of each file manually.
+Running the `test_generator.py` file won't work due to the menus in the `generator.py` and `sql.py` files. In order to verify that the E-SQL queries match the SQL queries, you will have to run and compare the results of each file manually.
