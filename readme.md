@@ -12,7 +12,7 @@ The purpose of this project is to generate code that processes E-SQL queries. Ou
 ## How to Run
 
 - Step 0: Download and set up PostgreSQL Server on your machine. Make sure to initialize your credentials and put them in your own .env file.
-- Step 1: Install all of the dependencies by running
+- Step 1: Before continuing, we recommend creating a virtual environment first (`python -m venv venv`). Then, install all of the dependencies by running
 
 ```py
 pip install -r requirements.txt
