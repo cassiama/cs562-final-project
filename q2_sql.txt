@@ -1,0 +1,25 @@
+DROP TABLE IF EXISTS t1;
+DROP TABLE IF EXISTS t2;
+DROP TABLE IF EXISTS t3;
+
+CREATE TABLE t1 AS
+SELECT cust, prod, AVG(quant) AS avg_1_quant
+FROM sales
+WHERE state = 'NY'
+GROUP BY cust, prod;
+
+CREATE TABLE t2 AS
+SELECT cust, prod, AVG(quant) AS avg_2_quant
+FROM sales
+WHERE state = 'NJ'
+GROUP BY cust,prod;
+
+CREATE TABLE t3 AS
+SELECT cust, prod, AVG(quant) AS avg_3_quant
+FROM sales
+WHERE state = 'CT'
+GROUP BY cust, prod;
+
+SELECT cust,prod, avg_1_quant, avg_2_quant,avg_3_quant
+from t1 natural join t2 natural join t3
+
