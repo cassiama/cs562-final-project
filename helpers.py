@@ -31,7 +31,8 @@ def validate_condition(
     arg: str,
     max_group_number: int,
     possible_columns: list = [],
-    grouping_cond: bool = True
+    grouping_cond: bool = True,
+    such_that: bool = True
 ) -> bool:
     valid_conditions = []
     valid_lefthand = valid_op = valid_righthand = False
@@ -69,25 +70,31 @@ def validate_condition(
         # if not, then there will be a group in the condition
         else:
             # for such that clauses
-            if '.' in lefthand:
-                group, col = lefthand.split('.')
-                valid_lefthand = validate_group(group, max_group_number) and validate_attribute(col)
-                if righthand.count("'") == 0:
-                    try:
-                        righthand = int(righthand)
-                        valid_righthand = True
-                    except ValueError:
-                        valid_righthand = righthand in sales_columns and righthand in possible_columns
+            if such_that:
+                if '_' in lefthand or '_' in righthand:
+                    valid_lefthand = valid_righthand = False
                 else:
-                    valid_righthand = True
+                    group, col = lefthand.split('.')
+                    valid_lefthand = validate_group(group, max_group_number) and validate_attribute(col)
+                    if righthand.count("'") == 0:
+                        try:
+                            righthand = int(righthand)
+                            valid_righthand = True
+                        except ValueError:
+                            valid_righthand = righthand in sales_columns and righthand in possible_columns
+                    else:
+                        valid_righthand = True
 
             # for having clauses
-            elif '_' in lefthand:
-                _, group, col = lefthand.split('_')
-                valid_lefthand = validate_aggregate(lefthand) and validate_group(group, max_group_number) and validate_attribute(col)
+            else:
+                if '.' in lefthand or '.' in righthand:
+                    valid_lefthand = valid_righthand = False
+                else:
+                    _, group, col = lefthand.split('_')
+                    valid_lefthand = validate_aggregate(lefthand) and validate_group(group, max_group_number) and validate_attribute(col)
 
-                _, group, col = righthand.split('_')
-                valid_righthand = validate_aggregate(righthand) and validate_group(group, max_group_number) and validate_attribute(col)
+                    _, group, col = righthand.split('_')
+                    valid_righthand = validate_aggregate(righthand) and validate_group(group, max_group_number) and validate_attribute(col)
 
         valid_op = operator in sql_comparison_ops
         
@@ -295,7 +302,7 @@ def mf_struct_from_user_input():
                         break
 
                     # make sure the such that clause was valid
-                    valid_condition = validate_condition(such_that_clause, mf_struct['n'], possible_columns)
+                    valid_condition = validate_condition(such_that_clause, mf_struct['n'], possible_columns, grouping_cond=True)
                     if not valid_condition:
                         invalid_args.append(such_that_clause)
                         break
@@ -325,7 +332,7 @@ def mf_struct_from_user_input():
                     continue
 
                 # make sure the having clause was valid
-                valid_condition = validate_condition(having_clause, mf_struct['n'], possible_columns, grouping_cond=True)
+                valid_condition = validate_condition(having_clause, mf_struct['n'], possible_columns, grouping_cond=True, such_that=False)
                 if not valid_condition:
                     print(f"Invalid argument parsed: {having_clause}. Please try again.")
                     print(input_notes)
