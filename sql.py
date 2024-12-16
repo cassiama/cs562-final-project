@@ -4,7 +4,6 @@ import psycopg2.extras
 import tabulate
 from dotenv import load_dotenv
 
-
 def query():
     """
     Used for testing standard queries in SQL.
@@ -19,7 +18,11 @@ def query():
                             cursor_factory=psycopg2.extras.DictCursor)
     cur = conn.cursor()
     
-    input_file_no = 5
+    input_file_no = int(input("Input number for input file: "))
+    input_notes = 'Please make your number between 1 and 6.'
+    while input_file_no <= 0 or input_file_no > 6:
+        print(input_notes)
+        input_file_no = int(input("Input number for input file: "))
     filepath = f'./q{input_file_no}_sql.txt'
     with open(filepath, "r") as f:
         ere = f.read()
