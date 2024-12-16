@@ -10,7 +10,7 @@ sales_columns_types = {
 }
 sql_aggregates = ['avg', 'count', 'min', 'max', 'sum']
 sql_cond_ops = ['and', 'or', 'not']
-sql_comparison_ops = ['=', '>', '<', '>=', '<=', '<>']
+sql_comparison_ops = ['=', '>', '<', '>=', '<=', '!=']
 
 def validate_attribute(arg: str) -> bool:
     return arg in sales_columns
@@ -98,7 +98,12 @@ def validate_condition(
 def mf_struct_from_user_input():
         mf_struct = {}
         n_gv = 0
-        select_attr = group_attr = where_clause = aggregates = select_conds = having_conds = []
+        select_attr = []
+        group_attr = []
+        where_clause = []
+        aggregates = []
+        select_conds = []
+        having_conds = []
 
         args_parsed = 0
         max_args = 7
@@ -292,38 +297,19 @@ def mf_struct_from_user_input():
                 
                 # if empty, then move on to the next argument
                 if not having_clause:
+                    mf_struct['G'] = '-'
                     args_parsed += 1
                     invalid_args.clear()
                     continue
 
                 # make sure the having clause was valid
-                valid_condition = validate_condition(having_clause, mf_struct['n'], possible_columns)
+                valid_condition = validate_condition(having_clause, mf_struct['n'], possible_columns, grouping_cond=True)
                 if not valid_condition:
                     print(f"Invalid argument parsed: {having_clause}. Please try again.")
                     invalid_args.clear()
                     continue
 
-                having_conds.append(having_clause)
-                while having_clause:
-                    having_clause = input("What other conditions would you like to include?\nPress Enter to continue.\n")
-                    if not having_clause:
-                        break
-
-                    # make sure the having clause was valid
-                    valid_condition = validate_condition(having_clause, mf_struct['n'], possible_columns)
-                    if not valid_condition:
-                        invalid_args.append(having_clause)
-                        break
-
-                    # if having clause is valid, add to 'G' in mf_struct
-                    having_conds.append(having_clause)
-                
-                if len(invalid_args) > 0:
-                    print(f'Invalid argument parsed: {', '.join(invalid_args)}')
-                    invalid_args.clear()
-                    continue
-
-                mf_struct['G'] = having_conds
+                mf_struct['G'] = [having_clause]
                 args_parsed += 1
                 invalid_args.clear()
 
@@ -509,7 +495,7 @@ def parse_where_condition(condition):
     condition = re.sub(r"'(\d{4}-\d{2}-\d{2})'", convert_datetime_literals, condition)
 
     # Debug: Output transformed condition
-    print(f"Transformed condition: {condition}")
+    # print(f"Transformed condition: {condition}")
     return condition
     
 def parse_having_condition(condition):
