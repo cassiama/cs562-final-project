@@ -1,0 +1,4 @@
+SELECT cust, max(quant), avg(quant)
+FROM sales
+WHERE prod = 'Ham'
+GROUP BY cust

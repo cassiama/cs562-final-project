@@ -18,7 +18,13 @@ def query():
     conn = psycopg2.connect("dbname="+dbname+" user="+user+" password="+password,
                             cursor_factory=psycopg2.extras.DictCursor)
     cur = conn.cursor()
-    cur.execute("SELECT * FROM sales WHERE quant > 10")
+    
+    input_file_no = 5
+    filepath = f'./q{input_file_no}_sql.txt'
+    with open(filepath, "r") as f:
+        ere = f.read()
+
+    cur.execute(ere)
 
     return tabulate.tabulate(cur.fetchall(),
                              headers="keys", tablefmt="psql")
