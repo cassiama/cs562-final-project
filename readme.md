@@ -6,8 +6,8 @@ The purpose of this project is to generate code that processes E-SQL queries. Ou
 
 ## Caveats
 
-- This code was not developed with the goal of creating optimized code. Its purpose is convert E-SQL code into a Φ operator into the algorithmic steps required to process it.
-- We had to come up with our own E-SQL queries and corresponding relational expressions for this project. Most of them are based on examples from class.
+- This code was not developed with the goal of creating optimized code. Its purpose is to convert the arguments for the Φ (phi) operator into the algorithmic steps required to process it.
+- We had to come up with our own E-SQL relational expressions for this project. Most of them are based on examples from class.
 
 ## How to Run
 
@@ -19,3 +19,5 @@ pip install -r requirements.txt
 ```
 
 - Step 2: Run the `generator.py` file and view the results in `_generated.py`.
+
+- Step 3: Type '1' to manually input the arguments for the Φ (phi) operator or type '2' to run one of the query text files.
