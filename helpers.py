@@ -112,6 +112,7 @@ def mf_struct_from_user_input():
         while args_parsed != max_args:
             if args_parsed == 0:      
                 # get the select attributes
+
                 select_attr = input('What attributes & aggregates do you want to select? Format: attribute, aggregate_1_attribute, aggregate_2_attribute...\n')
                 # if empty, start from scratch
                 if not select_attr:
@@ -309,27 +310,6 @@ def mf_struct_from_user_input():
                     invalid_args.clear()
                     continue
 
-                having_conds.append(having_clause)
-                while having_clause:
-                    having_clause = input("What other conditions would you like to include?\nPress Enter to continue.\n")
-                    if not having_clause:
-                        break
-
-                    # make sure the having clause was valid
-                    valid_condition = validate_condition(having_clause, mf_struct['n'], possible_columns)
-                    if not valid_condition:
-                        invalid_args.append(having_clause)
-                        break
-
-                    # if having clause is valid, add to 'G' in mf_struct
-                    having_conds.append(having_clause)
-                
-                if len(invalid_args) > 0:
-                    print(f"Invalid argument parsed: {', '.join(invalid_args)}")
-                    invalid_args.clear()
-                    continue
-
-                mf_struct['G'] = having_conds
                 mf_struct['G'] = [having_clause]
                 args_parsed += 1
                 invalid_args.clear()
