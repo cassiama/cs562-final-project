@@ -21,3 +21,6 @@ pip install -r requirements.txt
 - Step 2: Run the `generator.py` file and view the results in `_generated.py`.
 
 - Step 3: Type '1' to manually input the arguments for the Φ (phi) operator or type '2' to run one of the query text files.
+
+## Limitations
+Running the `test_generator.py` file won't work due to adding menus to the `generator.py` and `sql.py` files. In order to verify that the E-SQL queries match the SQL matches, you will have to run and compare the results of each file manually.
