@@ -11,7 +11,10 @@ The purpose of this project is to generate code that processes E-SQL queries. Ou
 
 ## How to Run
 
-- Step 0: Download and set up PostgreSQL Server on your machine. Make sure to initialize your credentials and put them in your own .env file.
+- Step 0: Download and set up PostgreSQL Server on your machine. Make sure to initialize your credentials and put them in your own `.env` file. Please have the following variables in the `.env` file:
+  - USER
+  - PASSWORD
+  - DBNAME
 - Step 1: Before continuing, we recommend creating a virtual environment first (`python -m venv {your_venv}`).
 - Step 2: Next, activate the virtual environment. It's different for each major OS.
   - Windows (PowerShell): `{your_venv}\Scripts\activate.ps1`
