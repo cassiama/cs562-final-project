@@ -109,14 +109,18 @@ def mf_struct_from_user_input():
         max_args = 7
         invalid_args = []
         possible_columns = []
+        input_notes = ''
         while args_parsed != max_args:
-            if args_parsed == 0:      
-                # get the select attributes
+            if args_parsed == 0:
+                input_notes = 'What attributes & aggregates do you want to select? Format: attribute, aggregate_1_attribute, aggregate_2_attribute...\n'
 
-                select_attr = input('What attributes & aggregates do you want to select? Format: attribute, aggregate_1_attribute, aggregate_2_attribute...\n')
+                # get the select attributes
+                select_attr = input("SELECT ATTRIBUTE(S):\n")
+
                 # if empty, start from scratch
                 if not select_attr:
                     print('Input is empty. Try again.')
+                    print(input_notes)
                     invalid_args.clear()
                     continue
 
@@ -126,6 +130,7 @@ def mf_struct_from_user_input():
                 if len(select_attr) == 1:
                     if not valid_column:
                         print(f"Invalid argument parsed: {select_attr[0]}. Try again.")
+                        print(input_notes)
                         invalid_args.clear()
                         continue
                     possible_columns.append(select_attr[0])
@@ -143,6 +148,7 @@ def mf_struct_from_user_input():
                             
                     if len(invalid_args) > 0:
                         print(f"Invalid argument parsed: {', '.join(invalid_args)}. Try again.")
+                        print(input_notes)
                         invalid_args.clear()
                         continue
 
@@ -154,10 +160,12 @@ def mf_struct_from_user_input():
 
             if args_parsed == 1:
                 # get the number of grouping variables
+                input_notes = 'How many grouping variables?\n'
                 try:
-                    n_gv = int(input('How many grouping variables?\n'))
+                    n_gv = int(input("NUMBER OF GROUPING VARIABLES(n):\n"))
                     if n_gv < 0:
                         print(f"Invalid argument parsed: {n_gv}. Try again")
+                        print(input_notes)
                         invalid_args.clear()
                         continue
 
@@ -166,15 +174,18 @@ def mf_struct_from_user_input():
                     invalid_args.clear()
                 except ValueError:
                     print(f"Invalid argument parsed: {n_gv}. Try again")
+                    print(input_notes)
                     invalid_args.clear()
                     continue
 
             if args_parsed == 2:
-                group_attr = input('What attributes do you want to group by? Format: attribute1, attribute2, ...\n')
+                input_notes = 'What attributes do you want to group by? Format: attribute1, attribute2, ...\n'
+                group_attr = input("GROUPING ATTRIBUTES(V):\n")
 
                 # if empty, start from scratch
                 if not group_attr:
                     print('Input is empty. Try again.')
+                    print(input_notes)
                     invalid_args.clear()
                     continue
 
@@ -183,6 +194,7 @@ def mf_struct_from_user_input():
                 valid_column = validate_attribute(group_attr[0])
                 if len(group_attr) == 1 and not valid_column:
                     print(f"Invalid argument parsed: {group_attr[0]}. Try again.")
+                    print(input_notes)
                     invalid_args.clear()
                     continue
 
@@ -197,6 +209,7 @@ def mf_struct_from_user_input():
                             
                     if len(invalid_args) > 0:
                         print(f"Invalid argument parsed: {', '.join(invalid_args)}. Try again.")
+                        print(input_notes)
                         invalid_args.clear()
                         continue
 
@@ -205,7 +218,8 @@ def mf_struct_from_user_input():
                 invalid_args.clear()
 
             if args_parsed == 3:
-                where_clause = input(f'What\'s your WHERE clause? Format: attribute comparison_op "val"\nPress Enter to continue.\n')
+                input_notes = f'What\'s your WHERE clause? Format: attribute comparison_op "val"\nPress Enter to continue.\n'
+                where_clause = input("WHERE CLAUSE(W):\n")
                 
                 # if empty, then move on to the next argument
                 if not where_clause:
@@ -218,6 +232,7 @@ def mf_struct_from_user_input():
                 valid_condition = validate_condition(where_clause, mf_struct['n'], possible_columns, grouping_cond=False)
                 if not valid_condition:
                     print(f"Invalid argument parsed: {where_clause}. Please try again.")
+                    print(input_notes)
                     invalid_args.clear()
                     continue
 
@@ -226,11 +241,13 @@ def mf_struct_from_user_input():
                 invalid_args.clear()
 
             if args_parsed == 4:
+                input_notes = "What aggregates are included in your SELECT clause? NOTE: Reuse the aggregates you used for the SELECT step.\n"
                 # get the aggregates vector
-                aggregates = input("What aggregates are included in your SELECT clause? NOTE: Reuse the aggregates you used for the SELECT step.\n")
+                aggregates = input("F-VECT([F]):\n")
                 # if empty, start from scratch
                 if not aggregates:
                     print('Input is empty. Try again.')
+                    print(input_notes)
                     invalid_args.clear()
                     continue
 
@@ -243,6 +260,7 @@ def mf_struct_from_user_input():
                 
                 if len(invalid_args) > 0:
                     print(f"Invalid argument parsed: {', '.join(invalid_args)}. All aggregates you input must be present in the SELECT clause. Try again.\n")
+                    print(input_notes)
                     invalid_args.clear()
                     continue
 
@@ -252,7 +270,8 @@ def mf_struct_from_user_input():
 
             # get the select condition vector
             if args_parsed == 5:
-                such_that_clause = input(f'What\'s your SUCH THAT clause? Format: group_number.attribute comparison_op "val"\nPress Enter to continue.\n')
+                input_notes = f'What\'s your SUCH THAT clause? Format: group_number.attribute comparison_op "val"\nPress Enter to continue.\n'
+                such_that_clause = input("SELECT CONDITION-VECT([C]):\n")
                 
                 # if empty, then move on to the next argument
                 if not such_that_clause:
@@ -265,6 +284,7 @@ def mf_struct_from_user_input():
                 valid_condition = validate_condition(such_that_clause, mf_struct['n'], possible_columns)
                 if not valid_condition:
                     print(f"Invalid argument parsed: {such_that_clause}. Please try again.")
+                    print(input_notes)
                     invalid_args.clear()
                     continue
 
@@ -285,6 +305,7 @@ def mf_struct_from_user_input():
                 
                 if len(invalid_args) > 0:
                     print(f"Invalid argument parsed: {', '.join(invalid_args)}")
+                    print(input_notes)
                     invalid_args.clear()
                     continue
 
@@ -294,11 +315,11 @@ def mf_struct_from_user_input():
 
             if args_parsed == 6:
                 # get the having clause vector (if it exists)
-                having_clause = input(f'What\'s your HAVING clause? Format: aggregate_1_attribute comparison_op aggregate_2_attribute\nPress Enter to continue.\n')
+                input_notes = f'What\'s your HAVING clause? Format: aggregate_1_attribute comparison_op aggregate_2_attribute\nPress Enter to continue.\n'
+                having_clause = input("HAVING CLAUSE (G):\n")                
                 
                 # if empty, then move on to the next argument
                 if not having_clause:
-                    mf_struct['G'] = '-'
                     args_parsed += 1
                     invalid_args.clear()
                     continue
@@ -307,10 +328,12 @@ def mf_struct_from_user_input():
                 valid_condition = validate_condition(having_clause, mf_struct['n'], possible_columns, grouping_cond=True)
                 if not valid_condition:
                     print(f"Invalid argument parsed: {having_clause}. Please try again.")
+                    print(input_notes)
                     invalid_args.clear()
                     continue
 
-                mf_struct['G'] = [having_clause]
+                having_conds.append(having_clause)
+                mf_struct['G'] = having_conds
                 args_parsed += 1
                 invalid_args.clear()
 
