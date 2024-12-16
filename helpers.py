@@ -2,6 +2,7 @@ import tabulate, re
 from collections import defaultdict
 import datetime
 
+# global variables (used for validation & parsing functions)
 sales_columns = ['cust', 'prod', 'day', 'month', 'year', 'state', 'quant', 'date']
 sales_columns_types = {
     'int': ['day', 'month', 'year', 'quant'],
@@ -12,12 +13,31 @@ sql_aggregates = ['avg', 'count', 'min', 'max', 'sum']
 sql_cond_ops = ['and', 'or', 'not']
 sql_comparison_ops = ['=', '>', '<', '>=', '<=', '!=']
 
+'''
+Input:
+arg - the attribute to be validated. must be a valid attribute in the sales table.
+
+Returns true if 'arg' is a valid column in the sales table.
+'''
 def validate_attribute(arg: str) -> bool:
     return arg in sales_columns
 
+'''
+Input:
+arg - the aggregate to be validated. must be an aggregate on a valid attribute.
+
+Returns true if the 'arg' is a valid aggregate on a valid attribute.
+'''
 def validate_aggregate(arg: str) -> bool:
     return any([arg.startswith(agg) for agg in sql_aggregates]) and any([arg.endswith(col) for col in sales_columns])
 
+'''
+Input:
+arg - the group number to be validated. must be a number > 0 and < the maximum number of possible grouping variables.
+max_group_number - the maximum number of grouping variables
+
+Returns true if the 'arg' is a valid group number.
+'''
 def validate_group(arg: str, max_group_number: int) -> bool:
     try:
         arg = int(arg)
@@ -27,6 +47,16 @@ def validate_group(arg: str, max_group_number: int) -> bool:
         return False
     return True
 
+'''
+Input:
+arg - the condition to be validated. must be a valid condition for WHERE, SUCH THAT, or HAVING clause.
+max_group_number - the maximum number of grouping variables
+possible_columns - list of all columns that have been parsed from user input
+grouping_cond - boolean that determines if the condition contains grouping variables
+such_that - boolean that determines whether the condition is for the such that clause or having clause
+
+Returns true if the 'arg'
+'''
 def validate_condition(
     arg: str,
     max_group_number: int,
@@ -101,7 +131,11 @@ def validate_condition(
         valid_conditions.append(valid_lefthand and valid_op and valid_righthand)
     return all(valid_conditions)
 
+'''
+Input: None
 
+Returns a 'mf_struct' dictionary from user input.
+'''
 def mf_struct_from_user_input():
         mf_struct = {}
         n_gv = 0
@@ -169,7 +203,8 @@ def mf_struct_from_user_input():
                 # get the number of grouping variables
                 input_notes = 'How many grouping variables?\n'
                 try:
-                    n_gv = int(input("NUMBER OF GROUPING VARIABLES(n):\n"))
+                    input_n = input("NUMBER OF GROUPING VARIABLES(n):\n")
+                    n_gv = int(input_n)
                     if n_gv < 0:
                         print(f"Invalid argument parsed: {n_gv}. Try again")
                         print(input_notes)
@@ -180,7 +215,7 @@ def mf_struct_from_user_input():
                     args_parsed += 1
                     invalid_args.clear()
                 except ValueError:
-                    print(f"Invalid argument parsed: {n_gv}. Try again")
+                    print(f"Invalid argument parsed: {input_n}. Try again")
                     print(input_notes)
                     invalid_args.clear()
                     continue
@@ -225,7 +260,7 @@ def mf_struct_from_user_input():
                 invalid_args.clear()
 
             if args_parsed == 3:
-                input_notes = f'What\'s your WHERE clause? Format: attribute comparison_op "val"\nPress Enter to continue.\n'
+                input_notes = 'What\'s your WHERE clause? Format: attribute comparison_op "val"\nPress Enter to continue.\n'
                 where_clause = input("WHERE CLAUSE(W):\n")
                 
                 # if empty, then move on to the next argument
@@ -346,6 +381,12 @@ def mf_struct_from_user_input():
 
         return mf_struct
 
+'''
+Input:
+input_file_no - the query number
+
+Returns a 'mf_struct' dictionary from given input file.
+'''
 def mf_struct_from_input_file(input_file_no):
 
     filepath = f'./q{input_file_no}.txt'
@@ -394,6 +435,16 @@ def mf_struct_from_input_file(input_file_no):
 
     return mf_struct
 
+'''
+Input:
+full_table - the full sales table
+grouping_attributes - the group key (attributes from sales used to group the results)
+
+Returns a dictionary where:
+    - key - a tuple of grouping attributes
+    - value - a "bitmap" (list of 1s and 0s) which represents rows belonging to the group key.
+        - 1 means row is in table, 0 means row isn't in table
+'''
 def create_bitmaps(full_table, grouping_attributes):
     if len(grouping_attributes) == 1:
         unique_groups = set((row[grouping_attributes[0]],) for row in full_table)
@@ -426,7 +477,15 @@ def create_bitmaps(full_table, grouping_attributes):
 
     return bitmaps
 
+'''
+Input:
+bitmap - a list of 1s and 0s which represent rows in the table
+full_table - the full sales table
 
+Returns a list of dictionaries where each dictionary has a:
+    - key - attribute in the sales table
+    - value - value for attribute in that row
+'''
 def extract_rows_bitmap(bitmap, full_table):
     rows = []
 
@@ -436,6 +495,14 @@ def extract_rows_bitmap(bitmap, full_table):
 
     return rows
 
+'''
+Input:
+condition - the condition to be parsed. must be a condition from the user input or an input file.
+group_key - the attributes from sales used to group the results
+grouping_attributes - the grouping attributes (used in phi operator). must be from the user input or an input file.
+
+Returns the parsed condition (transformed for evaluation).
+'''
 def parse_condition(condition: str, group_key, grouping_attributes):
 
     condition = condition.replace(" = ", " == ")
@@ -461,7 +528,13 @@ def parse_condition(condition: str, group_key, grouping_attributes):
     
     condition = convert_dot_notation_to_dict_key(condition)
     return condition
-    
+
+'''
+Input:
+condition - the condition to be parsed. must be a WHERE clause condition from the user input or an input file.
+
+Returns the parsed condition (transformed for evaluation) for the WHERE clause.
+'''
 def parse_where_condition(condition):
 
     condition = condition.replace(" = ", " == ")
@@ -484,7 +557,13 @@ def parse_where_condition(condition):
 
     condition = re.sub(r"'(\d{4}-\d{2}-\d{2})'", convert_datetime_literals, condition)
     return condition
-    
+
+'''
+Input:
+condition - the condition to be parsed. must be a HAVING clause condition from the user input or an input file.
+
+Returns the parsed condition (transformed for evaluation) for the HAVING clause.
+'''
 def parse_having_condition(condition):
     comparison_operators = r"(<=|>=|<|>|==|!=)"
 
@@ -505,6 +584,14 @@ def parse_having_condition(condition):
     
     condition = transform_condition(condition)
     return condition
-    
+
+'''
+Input:
+dict - a dictionary where:
+    - key - an attribute in the sales table or aggregate on an attribute
+    - value - a list of all values for given attribute
+
+Prints out the dictionary as a SQL table.
+'''
 def print_dict_as_table(dict):
     print(tabulate.tabulate(dict,headers="keys", tablefmt="psql"))  

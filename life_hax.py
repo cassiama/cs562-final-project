@@ -4,7 +4,7 @@ import psycopg2
 import psycopg2.extras
 import tabulate
 from dotenv import load_dotenv
-from helpers import mf_struct_from_input_file,mf_struct_from_user_input,print_dict_as_table,create_bitmaps,extract_rows_bitmap,parse_condition,parse_where_condition,parse_having_condition
+from helpers import *
 
 # THIS IS A FILE FOR TESTING PURPOSES, PLEASE DELETE AT THE END OF PROJECT
 
